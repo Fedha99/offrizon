@@ -129,7 +129,7 @@ mod tests {
     }
 
     const TASKLIST: &str = "\"horizon-launcher.exe\",\"4120\",\"Console\",\"1\",\"212,044 K\"\r\n\
-        \"Offrizon-Launcher.exe\",\"9988\",\"Console\",\"1\",\"80,000 K\"\r\n\
+        \"Horizon-Launcher.exe\",\"9988\",\"Console\",\"1\",\"80,000 K\"\r\n\
         \"horizon-launcher.exe\",\"4120\",\"Console\",\"1\",\"212,044 K\"\r\n\
         \"horizon-launcher-setup.exe\",\"77\",\"Console\",\"1\",\"9,000 K\"\r\n";
 

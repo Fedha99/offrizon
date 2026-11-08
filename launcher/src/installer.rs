@@ -591,8 +591,8 @@ mod tests {
             PathBuf::from(r"C:\Games\Offrizon Launcher")
         );
         assert_eq!(
-            folder_for(Path::new(r"C:\Games\horizon launcher")),
-            PathBuf::from(r"C:\Games\horizon launcher")
+            folder_for(Path::new(r"C:\Games\offrizon launcher")),
+            PathBuf::from(r"C:\Games\offrizon launcher")
         );
     }
 

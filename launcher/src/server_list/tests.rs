@@ -240,7 +240,7 @@ fn a_moved_official_server_moves_the_players_entry_once() {
         &home,
         &[
             ("Friends", "friends.example"),
-            ("Our SMP", "Offrizon.Bunchy7s.DEV:25565"),
+            ("Our SMP", "Horizon.Bunchy7s.DEV:25565"),
         ],
         "horizon.bunchy7s.dev",
     );
