@@ -1,8 +1,8 @@
 //! Native mods' own crates and post-build steps (docs/native-mods.md, "Crates" and
 //! "Post-build steps"). horizon-mixins stages a mod's `[[crate]]` as
 //! `native-crates/<mod>/<crate>/`, a workspace member, and lists its `[[post_build]]` steps in
-//! `native-post-build.json`. A mod's crate may use only what Horizon's own `Cargo.lock` has: the
-//! lock file is the allow list, so a build never downloads a crate Horizon doesn't already ship.
+//! `native-post-build.json`. A mod's crate may use only what Offrizon's own `Cargo.lock` has: the
+//! lock file is the allow list, so a build never downloads a crate Offrizon doesn't already ship.
 use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
@@ -258,9 +258,9 @@ fn is_link_or_junction(metadata: &fs::Metadata) -> bool {
     false
 }
 
-/// Why a mod's crates can't build with Horizon's lock file `horizon`: a crate they name that it
+/// Why a mod's crates can't build with Offrizon's lock file `horizon`: a crate they name that it
 /// lacks (checked before Cargo, which would look for it online), or a package the updated lock
-/// `staged` has that Horizon's lacks or has in another version. None when they fit.
+/// `staged` has that Offrizon's lacks or has in another version. None when they fit.
 pub(super) fn refused(
     horizon: &BTreeSet<Locked>,
     staged: Option<&BTreeSet<Locked>>,
@@ -268,7 +268,7 @@ pub(super) fn refused(
     api_ids: &[&str],
 ) -> Option<String> {
     let why = |mod_id: &str, name: &str, version: &str| {
-        format!("{mod_id} needs {name} {version}, which isn't in Horizon's Cargo.lock. A native mod's crate can use only the crates Horizon itself uses, in the versions its Cargo.lock has.")
+        format!("{mod_id} needs {name} {version}, which isn't in Offrizon's Cargo.lock. A native mod's crate can use only the crates Offrizon itself uses, in the versions its Cargo.lock has.")
     };
     if let Some(w) = wanted
         .iter()
@@ -296,12 +296,12 @@ pub(super) fn refused(
 }
 
 /// A Cargo error (`run`'s) said plainly when it is `--locked` refusing to change the lock file:
-/// a mod's crate turned on, with a feature, a dependency Horizon's `Cargo.lock` lacks.
+/// a mod's crate turned on, with a feature, a dependency Offrizon's `Cargo.lock` lacks.
 pub(super) fn locked(error: String) -> String {
     if !error.contains("--locked was passed") {
         return error;
     }
-    format!("A native mod's crate needs a crate that isn't in Horizon's Cargo.lock, through one of its dependencies' features. A native mod's crate can use only the crates Horizon itself uses, with the features that need no others.\n\n{error}")
+    format!("A native mod's crate needs a crate that isn't in Offrizon's Cargo.lock, through one of its dependencies' features. A native mod's crate can use only the crates Offrizon itself uses, with the features that need no others.\n\n{error}")
 }
 
 /// A mod's post-build step: a program of one of its crates, run after the game compiles.
@@ -506,7 +506,7 @@ checksum = "def"
         // Asked for by name, and not in the lock: refused before Cargo looks online.
         let err = refused(&horizon, None, &[wants("bake", "rand", "0.9")], &[]).unwrap();
         assert!(
-            err.starts_with("bake needs rand 0.9, which isn't in Horizon's Cargo.lock"),
+            err.starts_with("bake needs rand 0.9, which isn't in Offrizon's Cargo.lock"),
             "{err}"
         );
         // In the lock, but the update had to change its version.
@@ -641,7 +641,7 @@ checksum = "def"
         let horizon = downloaded(LOCK).unwrap();
         let err = refused(&horizon, None, &wanted, &[]).unwrap();
         assert!(err.starts_with(
-            "bake needs gtnh-lv-compressor-eval-industrial-sim 1, which isn't in Horizon's Cargo.lock"
+            "bake needs gtnh-lv-compressor-eval-industrial-sim 1, which isn't in Offrizon's Cargo.lock"
         ));
     }
 

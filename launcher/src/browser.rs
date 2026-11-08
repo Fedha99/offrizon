@@ -77,6 +77,7 @@ pub enum SourceId {
     Modrinth,
     CurseForge,
     /// Offrizon's own registry of reviewed mods, modpacks and resource packs ([`horizon`]).
+    #[serde(rename = "horizon")]
     Offrizon,
 }
 

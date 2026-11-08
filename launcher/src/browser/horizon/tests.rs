@@ -65,7 +65,7 @@ fn native_registry_entries_are_mods_that_say_they_run_native_code() {
 #[test]
 fn only_horizons_own_projects_go_without_the_not_endorsed_line() {
     let mut p = sample().projects[0].clone();
-    p.authors = vec!["Horizon".into()];
+    p.authors = vec!["Offrizon".into()];
     p.source = "https://github.com/horizon-rust/horizon-mod-zoom".into();
     assert!(official(&p));
     p.source = "https://github.com/someone/horizon-mod-zoom".into();
@@ -81,7 +81,7 @@ fn only_horizons_own_projects_say_they_come_from_horizon() {
     index.projects[0].authors = vec!["levzzz5154".into()];
     index.projects[0].source = "https://github.com/levzzz5154/horizon-mod-zoom".into();
     assert!(!official_in(Some(&index), &id), "a contributor's project");
-    index.projects[0].authors = vec!["Horizon".into()];
+    index.projects[0].authors = vec!["Offrizon".into()];
     index.projects[0].source = "https://github.com/horizon-rust/horizon-mod-zoom".into();
     assert!(official_in(Some(&index), &id));
     assert!(!official_in(Some(&index), "not_listed"));
@@ -493,7 +493,7 @@ fn versions_for_a_newer_horizon_are_not_installed() {
     let e = newest(&index, p, Some(0)).unwrap_err();
     assert_eq!(
         e,
-        "Coordinates HUD needs a newer Horizon than the game you play: update it first."
+        "Coordinates HUD needs a newer Offrizon than the game you play: update it first."
     );
     assert!(newest(&index, p, Some(1)).is_ok());
     assert!(newest(&index, p, None).is_ok());

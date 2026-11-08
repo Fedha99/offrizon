@@ -71,7 +71,7 @@ const PLAY: Context = Context {
 /// The browser's entry for `ruby` at `version`.
 fn entry(version: &str) -> installed::Entry {
     installed::Entry {
-        source: SourceId::Horizon,
+        source: SourceId::Offrizon,
         project: "ruby".into(),
         slug: "ruby".into(),
         title: "Ruby".into(),
@@ -155,7 +155,7 @@ fn updates_forward_on_the_same_game_only() {
     };
     assert_eq!(to(&modrinth, &PLAY), None);
 
-    // The newest needs a newer Horizon: the one before it.
+    // The newest needs a newer Offrizon: the one before it.
     let mut newer = index.clone();
     let ruby_at = newer.projects.len() - 1;
     newer.projects[ruby_at].versions[0].api_level = Some(7);
@@ -196,7 +196,7 @@ fn a_new_version_that_drops_content_is_named() {
 /// The installed ruby: the browser's entry and the file's bytes.
 fn installed_ruby(home: &Path) -> (String, Vec<u8>) {
     let list = installed::Installed::load(home);
-    let e = list.find(SourceId::Horizon, "ruby").unwrap();
+    let e = list.find(SourceId::Offrizon, "ruby").unwrap();
     (e.version.clone(), fs::read(home.join(&e.file)).unwrap())
 }
 
@@ -294,7 +294,7 @@ fn an_update_cut_short_is_rolled_back_at_the_next_start() {
     )
     .unwrap();
     let before = installed::Installed::load(&home);
-    let old = before.find(SourceId::Horizon, "ruby").unwrap().clone();
+    let old = before.find(SourceId::Offrizon, "ruby").unwrap().clone();
     // An earlier launcher kept 1.0.0, then stopped with a half-written file and the list still
     // naming 1.0.0.
     let mut k = keep(&home, &old).unwrap();
@@ -450,11 +450,11 @@ fn auto_update_and_manual_mutation_do_not_race_or_lose_entries() {
         final_installed.entries
     );
     let ruby_entry = final_installed
-        .find(SourceId::Horizon, "ruby")
+        .find(SourceId::Offrizon, "ruby")
         .expect("ruby present");
     assert_eq!(ruby_entry.version, "1.1.0");
     let coords_entry = final_installed
-        .find(SourceId::Horizon, "coords_hud")
+        .find(SourceId::Offrizon, "coords_hud")
         .expect("coords_hud present");
     assert_eq!(coords_entry.version, "0.1.0");
 
@@ -529,10 +529,10 @@ fn auto_update_does_not_revive_concurrently_removed_mod() {
     let final_installed = installed::Installed::load(&home);
     assert_eq!(final_installed.entries.len(), 1);
     assert!(final_installed
-        .find(SourceId::Horizon, "coords_hud")
+        .find(SourceId::Offrizon, "coords_hud")
         .is_none());
     let ruby_entry = final_installed
-        .find(SourceId::Horizon, "ruby")
+        .find(SourceId::Offrizon, "ruby")
         .expect("ruby present");
     assert_eq!(ruby_entry.version, "1.1.0");
 

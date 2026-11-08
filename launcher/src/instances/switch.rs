@@ -1,15 +1,15 @@
 //! Switching what an instance plays (Edit's kinds, the mockup's `InstanceModal` for an existing
-//! instance): Horizon, or Minecraft: Java Edition of one version with or without a loader. Only
+//! instance): Offrizon, or Minecraft: Java Edition of one version with or without a loader. Only
 //! its entry in `instances.json` changes. Its folder, with its worlds, mods and options, is never
 //! touched, and a Java instance's own settings (memory, Java, arguments, window) are put aside
-//! while it plays Horizon, to come back with Java.
+//! while it plays Offrizon, to come back with Java.
 use super::*;
 use crate::loaders::Loader;
 
 /// What an instance plays.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Plays {
-    Horizon,
+    Offrizon,
     Java {
         minecraft: String,
         loader: Option<Loader>,
@@ -20,7 +20,7 @@ impl Plays {
     /// What `instance` plays now.
     pub fn of(instance: &Instance) -> Plays {
         match &instance.java {
-            None => Plays::Horizon,
+            None => Plays::Offrizon,
             Some(j) => Plays::Java {
                 minecraft: j.minecraft.clone(),
                 loader: j.loader.clone(),
@@ -28,18 +28,18 @@ impl Plays {
         }
     }
 
-    /// The Minecraft version its worlds are saved by; `horizon` is the one Horizon plays.
+    /// The Minecraft version its worlds are saved by; `horizon` is the one Offrizon plays.
     fn minecraft<'a>(&'a self, horizon: &'a str) -> &'a str {
         match self {
-            Plays::Horizon => horizon,
+            Plays::Offrizon => horizon,
             Plays::Java { minecraft, .. } => minecraft,
         }
     }
 
-    /// Whose mods it loads: Horizon's, a loader's, or none (Vanilla).
+    /// Whose mods it loads: Offrizon's, a loader's, or none (Vanilla).
     fn mods_for(&self) -> Option<(&'static str, &'static str)> {
         match self {
-            Plays::Horizon => Some(("horizon", "Horizon")),
+            Plays::Offrizon => Some(("horizon", "Offrizon")),
             Plays::Java { loader, .. } => loader.as_ref().map(|l| (l.kind.id(), l.kind.name())),
         }
     }
@@ -47,7 +47,7 @@ impl Plays {
     /// Whether it loads mods made for `id` (a Quilt instance takes Fabric's too).
     fn loads(&self, id: &str) -> bool {
         match (self, self.mods_for()) {
-            (Plays::Horizon, _) => id == "horizon",
+            (Plays::Offrizon, _) => id == "horizon",
             (_, Some((own, _))) => own == id || (own == "quilt" && id == "fabric"),
             (_, None) => false,
         }
@@ -58,7 +58,7 @@ impl Plays {
 /// player to read before it applies.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Unkept {
-    /// `count` mods made for `made_for` (Horizon, Fabric…), which the new game doesn't load.
+    /// `count` mods made for `made_for` (Offrizon, Fabric…), which the new game doesn't load.
     Mods { count: usize, made_for: String },
     /// `count` mods made for Minecraft `from`: some may not load in `to`.
     ModsVersion {
@@ -75,7 +75,7 @@ pub enum Unkept {
     },
 }
 
-/// What switching `instance` to `to` can't keep. `horizon`: the Minecraft version Horizon plays.
+/// What switching `instance` to `to` can't keep. `horizon`: the Minecraft version Offrizon plays.
 pub fn unkept(instance: &Instance, to: &Plays, horizon: &str) -> Vec<Unkept> {
     let from = Plays::of(instance);
     let mut out = Vec::new();
@@ -106,7 +106,7 @@ pub fn unkept(instance: &Instance, to: &Plays, horizon: &str) -> Vec<Unkept> {
     out
 }
 
-/// The mods in `home`: a Horizon instance's content mods (`mods/*.hmod`) and native mods, a Java
+/// The mods in `home`: a Offrizon instance's content mods (`mods/*.hmod`) and native mods, a Java
 /// one's jars, on or off.
 fn mod_files(home: &Path, horizon: bool) -> usize {
     let count = |dir: &str, ext: &dyn Fn(&str) -> bool| {
@@ -153,7 +153,7 @@ pub(super) fn switch_in(
         return Err(format!("{} plays what it was made with.", instance.name));
     }
     edit_in(game_home, data, query, |m| match to {
-        Plays::Horizon => {
+        Plays::Offrizon => {
             if let Some(java) = m.java.take() {
                 m.java_kept = Some(java);
             }

@@ -78,7 +78,7 @@ fn a_modded_pack_fills_the_instance_it_is_imported_into() {
         zip.write_all(&body).unwrap();
     }
     zip.finish().unwrap();
-    // A Horizon instance takes no loader pack; a Java one does.
+    // A Offrizon instance takes no loader pack; a Java one does.
     let make = |name: &str| -> Result<Instance, String> {
         fs::create_dir_all(&home).unwrap();
         Ok(Instance {

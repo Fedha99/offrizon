@@ -105,7 +105,7 @@ fn existing_worlds_stay_where_they_are_and_every_folder_becomes_an_instance() {
     let all = list_in(&home, &data);
     let ids: Vec<&str> = all.iter().map(|i| i.id.as_str()).collect();
     assert_eq!(ids, [DEFAULT, "pack:cozy", "port:small-pack"]);
-    assert_eq!(all[0].name, "Horizon");
+    assert_eq!(all[0].name, "Offrizon");
     assert_eq!(all[0].home, home);
     assert_eq!(all[1].home, home.join("horizon-packs/cozy/home"));
     assert_eq!(all[2].name, "Small Pack");
@@ -307,7 +307,7 @@ fn play_time_reads_as_minutes_then_hours() {
 
 /// A Java instance: an empty folder of its own (the real game keeps its own options), its
 /// version in instances.json, kept by a copy, and refused by Play until the launcher starts
-/// the real game; Horizon instances' entries stay as they were.
+/// the real game; Offrizon instances' entries stay as they were.
 #[test]
 fn a_java_instance_plays_one_minecraft_version_in_its_own_folder() {
     let root = scratch("java");
@@ -319,7 +319,7 @@ fn a_java_instance_plays_one_minecraft_version_in_its_own_folder() {
     assert_eq!(java.java.as_ref().unwrap().minecraft, "1.21.4");
     let copy = create_in(&home, &data, "Second", Some(&java), None).unwrap();
     assert_eq!(copy.java, java.java);
-    let horizon = create_in(&home, &data, "Horizon two", None, None).unwrap();
+    let horizon = create_in(&home, &data, "Offrizon two", None, None).unwrap();
     assert_eq!(horizon.java, None);
     let store = fs::read_to_string(data.join(FILE)).unwrap();
     assert_eq!(
@@ -431,9 +431,9 @@ fn a_picture_is_kept_small_and_goes_to_the_trash() {
     fs::remove_dir_all(&root).unwrap();
 }
 
-/// Edit switches what an instance plays (Horizon, Vanilla, a loader, another Minecraft version):
+/// Edit switches what an instance plays (Offrizon, Vanilla, a loader, another Minecraft version):
 /// its folder, with its worlds, mods and options, stays byte for byte as it was, a Java
-/// instance's settings come back after a turn as Horizon, and what can't keep working is named
+/// instance's settings come back after a turn as Offrizon, and what can't keep working is named
 /// first. The game's home plays what it was made with.
 #[test]
 fn switching_what_an_instance_plays_keeps_its_worlds_mods_and_settings() {
@@ -459,14 +459,14 @@ fn switching_what_an_instance_plays_keeps_its_worlds_mods_and_settings() {
         }),
     };
 
-    // Horizon to Fabric: Horizon's mod stops loading; its world is opened by another version.
+    // Offrizon to Fabric: Offrizon's mod stops loading; its world is opened by another version.
     let now = find_in(&list_in(&home, &data), &made.id).unwrap();
     assert_eq!(
         unkept(&now, &fabric("1.21.1"), "26.3"),
         [
             Unkept::Mods {
                 count: 1,
-                made_for: "Horizon".into()
+                made_for: "Offrizon".into()
             },
             Unkept::Worlds {
                 count: 1,
@@ -505,8 +505,8 @@ fn switching_what_an_instance_plays_keeps_its_worlds_mods_and_settings() {
         }
     );
 
-    // A turn as Horizon, then Vanilla: the Java settings come back, nothing on disk moved.
-    switch::switch_in(&home, &data, &made.id, Plays::Horizon).unwrap();
+    // A turn as Offrizon, then Vanilla: the Java settings come back, nothing on disk moved.
+    switch::switch_in(&home, &data, &made.id, Plays::Offrizon).unwrap();
     let horizon = find_in(&list_in(&home, &data), &made.id).unwrap();
     assert_eq!(horizon.java, None);
     let vanilla = Plays::Java {
@@ -533,7 +533,7 @@ fn switching_what_an_instance_plays_keeps_its_worlds_mods_and_settings() {
 
     // The game's home can't switch, and is left as it was.
     let home_files = files(&home.join("saves"));
-    let refused = switch::switch_in(&home, &data, DEFAULT, Plays::Horizon).unwrap_err();
+    let refused = switch::switch_in(&home, &data, DEFAULT, Plays::Offrizon).unwrap_err();
     assert!(refused.contains("plays what it was made with"), "{refused}");
     assert_eq!(files(&home.join("saves")), home_files);
     fs::remove_dir_all(&root).unwrap();

@@ -1,5 +1,5 @@
-//! Horizon's own registry (docs/api/mod-index.md): mods, modpacks and resource packs made for
-//! Horizon, reviewed as pull requests in horizon-rust/horizon-mods. One file lists them all,
+//! Offrizon's own registry (docs/api/mod-index.md): mods, modpacks and resource packs made for
+//! Offrizon, reviewed as pull requests in horizon-rust/horizon-mods. One file lists them all,
 //! `index.json`; every download is checked against it before it reaches the game folder
 //! (`horizon_mods::index::check_file`: size, SHA-256, the author's signature, the file's own
 //! manifest), and files the index says were taken down are refused and turned off.
@@ -280,13 +280,13 @@ fn tags_of(index: &Index, kind: Kind) -> Vec<String> {
 /// Where the registry's mod policy is: who owns and answers for a project, takedowns.
 pub const POLICY: &str = "https://playhorizon.dev/mods/policy";
 
-/// Whether the Horizon project made `p` (the mod policy's "Official": author Horizon, source in
+/// Whether the Offrizon project made `p` (the mod policy's "Official": author Offrizon, source in
 /// the horizon-rust organisation).
 pub fn official(p: &index::Project) -> bool {
-    p.authors == ["Horizon"] && p.source.starts_with("https://github.com/horizon-rust/")
+    p.authors == ["Offrizon"] && p.source.starts_with("https://github.com/horizon-rust/")
 }
 
-/// Whether the registry's project `id` is Horizon's own ([`official`]), by the index already read
+/// Whether the registry's project `id` is Offrizon's own ([`official`]), by the index already read
 /// (never the network); false when none was read.
 pub fn is_official(id: &str) -> bool {
     official_in(known_index().as_deref(), id)
@@ -298,7 +298,7 @@ fn official_in(index: Option<&Index>, id: &str) -> bool {
 
 /// What the player reads about a registry project before installing it: who made it, whether its
 /// files are signed, and for a mod what it may do, in the game's words (Options > Mods). A native
-/// mod says it runs with the player's rights, and how it fits the Horizon `instance` plays.
+/// mod says it runs with the player's rights, and how it fits the Offrizon `instance` plays.
 pub fn trust_and_capabilities(
     id: &str,
     instance: Option<&crate::instances::Instance>,
@@ -310,10 +310,10 @@ pub fn trust_and_capabilities(
         return Vec::new();
     };
     let mut lines = vec![if official(p) {
-        "Made by Horizon".to_owned()
+        "Made by Offrizon".to_owned()
     } else {
         format!(
-            "Made by {}. Not made or endorsed by the Horizon project ({POLICY})",
+            "Made by {}. Not made or endorsed by the Offrizon project ({POLICY})",
             p.authors.join(", ")
         )
     }];
@@ -332,7 +332,7 @@ pub fn trust_and_capabilities(
                     .and_then(|i| crate::native_fit::line(i, &p.id, v.hooks, pin, &v.broken_on))
                     .unwrap_or_else(|| {
                         format!(
-                            "Built by the launcher on Horizon {}",
+                            "Built by the launcher on Offrizon {}",
                             &pin[..pin.len().min(7)]
                         )
                     }),
@@ -356,7 +356,7 @@ fn project_of(p: &index::Project) -> Option<Project> {
     let mut game_versions: Vec<String> = p.versions.iter().map(|v| v.game.clone()).collect();
     game_versions.dedup();
     Some(Project {
-        source: SourceId::Horizon,
+        source: SourceId::Offrizon,
         id: p.id.clone(),
         slug: p.id.clone(),
         title: p.name.clone(),
@@ -526,7 +526,7 @@ pub struct Registry;
 
 impl Source for Registry {
     fn id(&self) -> SourceId {
-        SourceId::Horizon
+        SourceId::Offrizon
     }
 
     fn search(&self, query: &Query) -> Result<Vec<Project>, String> {
@@ -539,10 +539,10 @@ impl Source for Registry {
         let index = index()?;
         let p = index
             .project(id)
-            .ok_or_else(|| format!("{id} isn't in Horizon's registry."))?;
+            .ok_or_else(|| format!("{id} isn't in Offrizon's registry."))?;
         project_of(p).ok_or_else(|| {
             format!(
-                "{} is a {} in Horizon's registry: this launcher can't install those yet.",
+                "{} is a {} in Offrizon's registry: this launcher can't install those yet.",
                 p.name,
                 p.kind.name()
             )
@@ -553,7 +553,7 @@ impl Source for Registry {
         let index = index()?;
         let p = index
             .project(&project.id)
-            .ok_or_else(|| format!("{} isn't in Horizon's registry.", project.title))?;
+            .ok_or_else(|| format!("{} isn't in Offrizon's registry.", project.title))?;
         let level = crate::backend::game_mod_api_level();
         Ok(p.versions
             .iter()
@@ -561,7 +561,7 @@ impl Source for Registry {
             .collect())
     }
 
-    /// Only categories and tags: every registry file is for Horizon on the version it plays. The
+    /// Only categories and tags: every registry file is for Offrizon on the version it plays. The
     /// tags come from the index the search already read (never the network).
     fn tags(&self, kind: Kind) -> Result<super::details::Tags, String> {
         Ok(super::details::Tags {
@@ -582,7 +582,7 @@ impl Source for Registry {
         let index = index()?;
         let p = index
             .project(&project.id)
-            .ok_or_else(|| format!("{} isn't in Horizon's registry.", project.title))?;
+            .ok_or_else(|| format!("{} isn't in Offrizon's registry.", project.title))?;
         let newest = p.versions.first();
         let mut body = p.description.clone();
         if let Some(v) = newest.filter(|v| !v.capabilities.is_empty()) {
@@ -727,7 +727,7 @@ fn install_from(
 ) -> Result<Vec<installed::Entry>, String> {
     let p = index
         .project(&project.id)
-        .ok_or_else(|| format!("{} isn't in Horizon's registry.", project.title))?;
+        .ok_or_else(|| format!("{} isn't in Offrizon's registry.", project.title))?;
     let v = newest(index, p, level)?;
     if needs_port(v) {
         return Err(format!("{} {NEEDS_PORT}.", p.name));
@@ -756,7 +756,7 @@ fn fetch_datapack_from(
     let p = index
         .project(&project.id)
         .filter(|p| p.kind == index::Kind::DataPack)
-        .ok_or_else(|| format!("{} isn't a data pack in Horizon's registry.", project.title))?;
+        .ok_or_else(|| format!("{} isn't a data pack in Offrizon's registry.", project.title))?;
     let v = newest(index, p, None)?;
     let file = &version_of(index, p, v, None).files[0];
     let path = fetch(file, folder, local, progress)?;
@@ -790,8 +790,8 @@ fn newest<'a>(
     })
 }
 
-const NEEDS_NEWER: &str = "needs a newer Horizon than the game you play";
-const NEEDS_PORT: &str = "needs a native port: Horizon doesn't run WebAssembly mods any more";
+const NEEDS_NEWER: &str = "needs a newer Offrizon than the game you play";
+const NEEDS_PORT: &str = "needs a native port: Offrizon doesn't run WebAssembly mods any more";
 
 /// Whether version `v` is a WebAssembly mod with code: a `.hmod` that may do more than add
 /// content. The registry keeps it for the modpacks that need it; a modpack installs it with its
@@ -850,7 +850,7 @@ fn install_version_guarded(
         false => relative(project.kind, &p.id, &v.file.name)?,
     };
     let mut list = installed::Installed::load(home);
-    let ours = |e: &installed::Entry| e.source == SourceId::Horizon && e.project == p.id;
+    let ours = |e: &installed::Entry| e.source == SourceId::Offrizon && e.project == p.id;
     let old = list.entries.iter().find(|e| ours(e)).cloned();
     if old.as_ref().is_some_and(|o| o.version == v.version) {
         return Ok(old.expect("checked"));
@@ -906,7 +906,7 @@ fn install_version_guarded(
         let _ = fs::remove_file(old);
     }
     let entry = installed::Entry {
-        source: SourceId::Horizon,
+        source: SourceId::Offrizon,
         project: p.id.clone(),
         slug: p.id.clone(),
         title: p.name.clone(),
@@ -954,7 +954,7 @@ pub fn turn_off_revoked(index: &Index, home: &Path) -> Vec<String> {
     let mut out = Vec::new();
     for e in installed::Installed::load(home).entries {
         let hash = e.checksum.strip_prefix("SHA-256:").unwrap_or_default();
-        let Some(r) = (e.source == SourceId::Horizon)
+        let Some(r) = (e.source == SourceId::Offrizon)
             .then(|| index.revoked(&e.project, hash))
             .flatten()
         else {
@@ -984,7 +984,7 @@ pub fn before_play(home: &Path) {
     let from_registry = installed::Installed::load(home)
         .entries
         .iter()
-        .any(|e| e.source == SourceId::Horizon);
+        .any(|e| e.source == SourceId::Offrizon);
     if !from_registry {
         return;
     }

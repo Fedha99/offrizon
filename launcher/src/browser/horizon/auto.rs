@@ -1,4 +1,4 @@
-//! Automatic updates of what the browser installed from Horizon's registry (Settings: "Update
+//! Automatic updates of what the browser installed from Offrizon's registry (Settings: "Update
 //! registry mods automatically", on by default): at the launcher's start and before Play, each
 //! installed registry project moves to its newest version for this game ([`Index::installable`]),
 //! checked as an install is. What it never touches:
@@ -10,7 +10,7 @@
 //!   plays, [`Report::rebuild`]);
 //! - a data pack: it lives in a world, not in the browser's list;
 //! - a version for another Minecraft than the one installed, a newer version that needs a newer
-//!   Horizon, and anything older than what is installed.
+//!   Offrizon, and anything older than what is installed.
 //!
 //! A content mod (`.hmod`) whose new version drops a block, item, entity, effect, menu or
 //! creative tab the installed one has waits for the player (its blocks would vanish from their
@@ -83,7 +83,7 @@ pub fn in_pack(home: &Path) -> bool {
 pub fn decide<'a>(index: &'a Index, entry: &installed::Entry, ctx: &Context) -> Decision<'a> {
     let native = crate::native_status::is_native_file(&entry.file);
     let skip_native = native && !ctx.natives;
-    if entry.source != SourceId::Horizon
+    if entry.source != SourceId::Offrizon
         || ctx.in_pack
         || skip_native
         || entry.kind == Kind::DataPack
@@ -174,7 +174,7 @@ fn save_kept(home: &Path, list: &[Kept]) -> Result<(), String> {
 /// Whether the browser's list has `kept`'s project at a newer version whose file is in place.
 fn finished(home: &Path, kept: &Kept) -> bool {
     let list = installed::Installed::load(home);
-    let Some(now) = list.find(SourceId::Horizon, &kept.entry.project) else {
+    let Some(now) = list.find(SourceId::Offrizon, &kept.entry.project) else {
         return false;
     };
     let hash = now.checksum.strip_prefix("SHA-256:").unwrap_or_default();
@@ -193,7 +193,7 @@ fn restore(home: &Path, kept: &Kept) -> Result<(), String> {
     fs::copy(&copy, &target).map_err(|e| format!("{}: {e}", target.display()))?;
     let mut list = installed::Installed::load(home);
     let ours =
-        |e: &installed::Entry| e.source == SourceId::Horizon && e.project == kept.entry.project;
+        |e: &installed::Entry| e.source == SourceId::Offrizon && e.project == kept.entry.project;
     if let Some(now) = list.entries.iter().find(|e| ours(e)) {
         if now.file != kept.entry.file {
             if let Some(path) = now.path(home) {

@@ -143,7 +143,7 @@ pub struct Step {
 }
 
 /// What installing `project` takes, dependencies first, checked before any byte is downloaded:
-/// every file runs in Horizon and has a version to install.
+/// every file runs in Offrizon and has a version to install.
 pub fn plan(source: &dyn Source, project: &Project, everything: bool) -> Result<Vec<Step>, String> {
     if project.kind == Kind::Modpack {
         return Err(format!(
@@ -177,19 +177,19 @@ fn add(
         return Err(format!("{}'s dependencies go too deep.", project.title));
     }
     if let Support::No(why) = project.support() {
-        return Err(format!("{} doesn't run in Horizon: {why}", project.title));
+        return Err(format!("{} doesn't run in Offrizon: {why}", project.title));
     }
     let versions = source.versions(&project)?;
     let Some(version) = pick(project.kind, &versions, everything).cloned() else {
         return Err(match versions.iter().find_map(|v| v.blocked.clone()) {
             Some(why) => format!("{} can't be installed from here: {why}", project.title),
-            None => format!("{} has no version Horizon runs.", project.title),
+            None => format!("{} has no version Offrizon runs.", project.title),
         });
     };
     for id in &version.required {
         let needed = source.project(id).map_err(|_| {
             format!(
-                "{} needs {id} on {}, which isn't a pack Horizon loads (a Java mod?).",
+                "{} needs {id} on {}, which isn't a pack Offrizon loads (a Java mod?).",
                 project.title,
                 source.id().label()
             )
@@ -217,7 +217,7 @@ pub fn install(
     progress: &dyn Fn(&str, f32),
 ) -> Result<Vec<Entry>, String> {
     let _lock = super::lock_home(home);
-    if project.source == SourceId::Horizon {
+    if project.source == SourceId::Offrizon {
         return super::horizon::install(project, home, progress);
     }
     if project.kind == Kind::Mod {
@@ -318,7 +318,7 @@ pub fn remove(home: &Path, name: &str) -> Result<Entry, String> {
         .lookup(name)
         .cloned()
         .ok_or_else(|| format!("{name} wasn't installed by the browser."))?;
-    if entry.kind == Kind::Mod && entry.source != SourceId::Horizon {
+    if entry.kind == Kind::Mod && entry.source != SourceId::Offrizon {
         super::java::remove(home, &entry)?;
     } else {
         match entry.path(home).map_or(Ok(()), fs::remove_file) {
@@ -327,7 +327,7 @@ pub fn remove(home: &Path, name: &str) -> Result<Entry, String> {
             Err(e) => return Err(format!("{}: {e}", entry.file)),
         }
     }
-    if let Some(id) = super::horizon::mod_id(&entry).filter(|_| entry.source == SourceId::Horizon) {
+    if let Some(id) = super::horizon::mod_id(&entry).filter(|_| entry.source == SourceId::Offrizon) {
         // The `.hmod` a mod that turned native left behind (horizon::install_version).
         if entry.file.ends_with(".hnmod") {
             let _ = fs::remove_file(home.join(super::java::MODS_DIR).join(format!("{id}.hmod")));
@@ -372,12 +372,12 @@ pub struct DataPackInstall {
     pub pack: crate::datapacks::DataPack,
     /// Its version's number.
     pub number: String,
-    /// What of it runs in Horizon.
+    /// What of it runs in Offrizon.
     pub coverage: crate::datapacks::Coverage,
 }
 
 /// Downloads a project's data pack (checksum checked) into the world folder `world`, under a
-/// free name. Refused when nothing in it runs in Horizon yet. It isn't recorded with the
+/// free name. Refused when nothing in it runs in Offrizon yet. It isn't recorded with the
 /// browser's installs: the world's data pack list (Home, `worlds datapack-list`) has it.
 pub fn install_datapack(
     source: &dyn Source,
@@ -396,7 +396,7 @@ pub fn install_datapack(
     ));
     // The registry's are checked against its index (signature, `pack.mcmeta` and `data/`).
     let fetched = match project.source {
-        SourceId::Horizon => super::horizon::fetch_datapack(project, &folder, progress),
+        SourceId::Offrizon => super::horizon::fetch_datapack(project, &folder, progress),
         _ => {
             let versions = source.versions(project)?;
             let version = pick(Kind::DataPack, &versions, everything).ok_or_else(|| {
@@ -421,8 +421,8 @@ pub fn install_datapack(
         let coverage = crate::datapacks::coverage(&zip)?;
         if coverage.read.is_empty() {
             return Err(format!(
-                "{} would change nothing in Horizon yet: it has no functions, predicates or item \
-                 modifiers, and Horizon doesn't read its {} yet.",
+                "{} would change nothing in Offrizon yet: it has no functions, predicates or item \
+                 modifiers, and Offrizon doesn't read its {} yet.",
                 project.title,
                 coverage.not_read()
             ));

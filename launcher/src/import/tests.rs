@@ -57,7 +57,7 @@ fn maker(root: &Path) -> impl Fn(&str) -> Result<Instance, String> + '_ {
 const NONE: &dyn Fn(&str, f32) = &|_, _| {};
 
 /// Bytes `build_import::is_game` accepts as a game build: this platform's
-/// executable magic followed by the mod API mark every Horizon program
+/// executable magic followed by the mod API mark every Offrizon program
 /// carries. Not a real program -- `what` only has to recognise one.
 fn fake_program() -> Vec<u8> {
     let magic: &[u8] = if cfg!(windows) {

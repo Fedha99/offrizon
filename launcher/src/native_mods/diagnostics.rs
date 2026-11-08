@@ -451,7 +451,7 @@ mod tests {
         fs::remove_dir_all(dir).unwrap();
     }
 
-    /// flair 1.0.0 on Horizon 66f3981: Horizon widened `extra` to five-element tuples, so the
+    /// flair 1.0.0 on Offrizon 66f3981: Offrizon widened `extra` to five-element tuples, so the
     /// call horizon-mixins generates for the mod's helper, outside the helper itself, fails.
     #[test]
     fn an_error_in_the_generated_call_to_a_helper_names_its_mod() {

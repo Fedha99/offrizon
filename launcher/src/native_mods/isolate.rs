@@ -1,4 +1,4 @@
-//! A mod that alone stops a build (it hooks code the build's Horizon doesn't have, or declares
+//! A mod that alone stops a build (it hooks code the build's Offrizon doesn't have, or declares
 //! the same support module as another mod) is left out, with the mods that need it, and the
 //! build runs again without them: the player still gets a game with the others, and is told
 //! which mods were left out and why.
@@ -11,7 +11,7 @@ use std::fs;
 /// Why a mod was left out of a build.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Why {
-    /// It doesn't apply to, or compile on, the Horizon the build uses.
+    /// It doesn't apply to, or compile on, the Offrizon the build uses.
     OtherVersion,
     /// It declares the same support module, in the same file, as this mod.
     Clash(String),
@@ -40,7 +40,7 @@ impl LeftOut {
     pub fn label(&self) -> String {
         match &self.why {
             Why::OtherVersion => trf(
-                "{name} was left out: made for another Horizon version",
+                "{name} was left out: made for another Offrizon version",
                 &[("name", &self.id)],
             ),
             Why::Clash(other) => trf(
@@ -99,7 +99,7 @@ fn modules(bundle: &Bundle) -> Vec<(String, String)> {
 /// (`{"code", "message", "mod_id", "file"}`) blames, and why; None when it names none of them,
 /// so the error is the build's. A support module's diagnostic names no mod (horizon-mixins
 /// e8cd0aa) but the module (`support module 'x' collides …`) or its destination (`file`, which
-/// this Horizon may not have); between two mods, neither: the later one is left out.
+/// this Offrizon may not have); between two mods, neither: the later one is left out.
 pub(super) fn from_mixins(output: &str, mods: &[Bundle]) -> Option<LeftOut> {
     let value: serde_json::Value = serde_json::from_str(&output[output.find('{')?..]).ok()?;
     let message = value["message"].as_str().unwrap_or_default();
@@ -219,7 +219,7 @@ mod tests {
             bundle(&root, "zoom", &[]),
             bundle(&root, "eatinganimation", &[]),
         ];
-        // horizon-mixins e8cd0aa on Horizon 6475f62, a player's build of 2026-11-05.
+        // horizon-mixins e8cd0aa on Offrizon 6475f62, a player's build of 2026-11-05.
         let output = r#"error: plan failed
 {
   "code": "E_TARGET_NOT_FOUND",
@@ -234,7 +234,7 @@ mod tests {
         );
         assert_eq!(
             left.label(),
-            "eatinganimation was left out: made for another Horizon version"
+            "eatinganimation was left out: made for another Offrizon version"
         );
         // A diagnostic naming no mod of the build is the build's own error.
         assert_eq!(
@@ -259,7 +259,7 @@ mod tests {
             (left.id.as_str(), left.why),
             ("hitbox_plus", Why::OtherVersion)
         );
-        // Or by its destination, a file this Horizon doesn't have (worldedit 1.2.1 on 6475f62).
+        // Or by its destination, a file this Offrizon doesn't have (worldedit 1.2.1 on 6475f62).
         let chat = "crates/horizon-client/src/chat.rs";
         let mods = [
             bundle(&root, "zoom", &[]),
