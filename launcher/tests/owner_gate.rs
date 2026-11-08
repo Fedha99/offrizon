@@ -7,8 +7,9 @@ use std::process::{Command, Output, Stdio};
 const REFUSED: &str = "Sign in with a Microsoft account that owns Minecraft: Java Edition to play.";
 
 /// Fresh homes with one installed (not prepared) version and an offline name, as a player who
-/// played offline before the gate has.
-fn home(name: &str) -> PathBuf {
+/// played offline before the gate has. `offline_play`: whether Offrizon's offline play setting
+/// is on (`settings.json` without it is on).
+fn home(name: &str, offline_play: bool) -> PathBuf {
     let root =
         std::env::temp_dir().join(format!("horizon-owner-gate-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
@@ -20,6 +21,9 @@ fn home(name: &str) -> PathBuf {
         r#"{"accounts":[],"selected":null,"offline":["Builder_1"],"offline_selected":"Builder_1"}"#,
     )
     .unwrap();
+    if !offline_play {
+        std::fs::write(root.join("launcher/settings.json"), r#"{"offline_play":false}"#).unwrap();
+    }
     root
 }
 
@@ -45,7 +49,7 @@ fn text(out: &Output) -> String {
 
 #[test]
 fn the_cli_refuses_to_play_without_an_owner() {
-    let root = home("cli");
+    let root = home("cli", false);
     let out = launcher(&root, &["play"]).output().unwrap();
     let said = text(&out);
     assert!(!out.status.success(), "{said}");
@@ -58,9 +62,21 @@ fn the_cli_refuses_to_play_without_an_owner() {
     let _ = std::fs::remove_dir_all(&root);
 }
 
+/// Offrizon's offline play is on unless turned off: with no account at all, `play` gets past
+/// the owner gate and stops later, at the version's missing preparation.
+#[test]
+fn the_cli_plays_offline_without_an_account() {
+    let root = home("cli-offline", true);
+    let out = launcher(&root, &["play"]).output().unwrap();
+    let said = text(&out);
+    assert!(!said.contains(REFUSED), "{said}");
+    assert!(said.contains("is not prepared yet"), "{said}");
+    let _ = std::fs::remove_dir_all(&root);
+}
+
 #[test]
 fn the_mcp_server_refuses_to_play_without_an_owner() {
-    let root = home("mcp");
+    let root = home("mcp", false);
     let mut child = launcher(&root, &["mcp"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

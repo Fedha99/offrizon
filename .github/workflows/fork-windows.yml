@@ -1,0 +1,101 @@
+name: fork windows build
+# Offrizon's Windows x64 builds, as workflow artifacts (no release, no signing):
+#   - the offline launcher (owner gate relaxed, offline play on by default), and
+#   - the game client and its tools, to import with the launcher's "Import a game build…".
+# HORIZON_FORK=1 is built into the launcher: it never self-updates from horizon-rust/horizon's
+# releases, which would bring the owner gate back and undo the rebrand. Run by hand
+# (workflow_dispatch) or on a push that touches the launcher or the game.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master, offrizon-rebrand]
+    paths:
+      - 'launcher/**'
+      - 'crates/**'
+      - '.github/workflows/fork-windows.yml'
+
+permissions:
+  contents: read
+
+env:
+  # Test and smoke runs never reach the telemetry server.
+  HORIZON_TELEMETRY_URL: "off"
+  # Marks the launcher as this fork's build (see backend::self_update_allowed).
+  HORIZON_FORK: "1"
+
+jobs:
+  launcher:
+    name: launcher windows x64
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: launcher
+        shell: bash
+    env:
+      # The C runtime linked in, so the standalone launcher needs no redistributable.
+      RUSTFLAGS: -C target-feature=+crt-static
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: launcher
+          shared-key: fork-launcher-windows
+      - run: cargo build --release --locked
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p out
+          short=${GITHUB_SHA::8}
+          cp target/release/horizon-launcher.exe out/
+          (cd out && 7z a offrizon-launcher-$short-windows-x64.zip horizon-launcher.exe)
+          cp target/release/horizon-launcher.exe out/offrizon-launcher-setup.exe
+          rm out/horizon-launcher.exe
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offrizon-launcher-windows-x64
+          path: launcher/out/*
+          retention-days: 14
+
+  game:
+    name: game windows x64
+    runs-on: windows-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    env:
+      # The C runtime linked in, so the game runs without the Visual C++ redistributable.
+      RUSTFLAGS: -C target-feature=+crt-static
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          shared-key: fork-game-windows
+      - run: cargo build --release --locked -p horizon-client -p horizon-client-lib --bin horizon-client --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p out/dist
+          short=${GITHUB_SHA::8}
+          for b in horizon-client horizon-ctl horizon-prepare horizon-server; do
+            test -f target/release/$b.exe || { echo "::error::target/release/$b.exe is missing"; exit 1; }
+            cp target/release/$b.exe out/dist/
+          done
+          (cd out/dist && 7z a ../offrizon-client-$short-windows-x64.zip \
+            horizon-client.exe horizon-ctl.exe horizon-prepare.exe horizon-server.exe)
+          rm -rf out/dist
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offrizon-client-windows-x64
+          path: out/*
+          retention-days: 14

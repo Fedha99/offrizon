@@ -1896,7 +1896,7 @@ impl Launcher {
         self.starting_client = Some(tag.clone());
         self.play_pressed = Some(Instant::now());
         let tx = self.tx.clone();
-        let offline_without_owner = true;
+        let offline_without_owner = self.settings.offline_play_allowed();
         // Registry mods update before the game reads them (`horizon::auto`); native mods only
         // at start, where a build can follow.
         let auto = self
@@ -4066,6 +4066,26 @@ impl Launcher {
                     .child(group("Game", "gamepad"))
                     .child(self.game_architecture_row(n + 5, cx))
                     .child(self.game_args_row(n + 6, cx))
+                    .child(index_row(
+                        n + 7,
+                        tr("Play offline without an account"),
+                        Some(plain(
+                            "The game starts with just a player name, no Microsoft account, and \
+                             keeps working with no internet. Minecraft's files still come from \
+                             your own install.",
+                        )),
+                        Some(
+                            switch("offline-play", self.settings.offline_play_allowed(), &t)
+                                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                                    this.settings.offline_play =
+                                        Some(!this.settings.offline_play_allowed());
+                                    this.save_settings();
+                                    cx.notify();
+                                }))
+                                .into_any_element(),
+                        ),
+                        &t,
+                    ))
                     .child(group("AI", "terminal"))
                     .child(self.no_ai_row(n + 6, cx))
                     .child(group("About", "info-box"))

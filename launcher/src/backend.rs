@@ -3180,9 +3180,13 @@ pub fn client_as(tag: &str, who: Option<&account::Player>) -> Result<Command, St
     if let Some(error) = game_architecture_launch_error(tag) {
         return Err(error);
     }
+    let offline_without_owner = Settings::load().offline_play_allowed();
     let session = match who {
-        None => account::session_for_game(&game_home(), false).map_err(|e| e.to_string()),
-        Some(who) => account::session_for_game_as(&game_home(), who),
+        None => {
+            account::session_for_game(&game_home(), offline_without_owner)
+                .map_err(|e| e.to_string())
+        }
+        Some(who) => account::session_for_game_as(&game_home(), who, offline_without_owner),
     }
     .map_err(|refused| format!("{refused} {}", crate::i18n::tr(SIGN_IN_HINT)))?;
     if let Err(e) = need_prepared(tag) {
@@ -3539,9 +3543,13 @@ fn launcher_asset_running_from(appimage: bool) -> Option<&'static str> {
     }
 }
 
-/// Development builds and `HORIZON_LAUNCHER_NO_SELF_UPDATE` never replace themselves.
+/// Development builds, `HORIZON_LAUNCHER_NO_SELF_UPDATE`, and Offrizon (built with
+/// `HORIZON_FORK=1`: it would otherwise replace itself with horizon-rust/horizon's release,
+/// which would bring the owner gate back and undo the rebrand) never replace themselves.
 pub fn self_update_allowed() -> bool {
-    !cfg!(debug_assertions) && std::env::var_os("HORIZON_LAUNCHER_NO_SELF_UPDATE").is_none()
+    !cfg!(debug_assertions)
+        && std::env::var_os("HORIZON_LAUNCHER_NO_SELF_UPDATE").is_none()
+        && option_env!("HORIZON_FORK").is_none()
 }
 
 /// The version in `horizon-launcher --version`'s output (`horizon-launcher 0.1.5`).
@@ -4511,6 +4519,11 @@ pub struct Settings {
     /// comes from the player's own install. Off by default, and absent from the file while off.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub dev_offline: bool,
+    /// Offline play: the game starts with no Microsoft account that owns Minecraft, from an
+    /// offline name or the game's own. Offrizon plays offline by default; `false` brings the
+    /// owner gate back. Unset is on, and absent from the file while unset.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offline_play: Option<bool>,
 }
 
 impl Settings {
@@ -4596,6 +4609,11 @@ impl Settings {
     /// Registry mods update by themselves ([`Settings::mods_auto_update`]): on unless turned off.
     pub fn auto_updates_mods(&self) -> bool {
         self.mods_auto_update.unwrap_or(true)
+    }
+    /// Offline play ([`Settings::offline_play`]): on unless turned off; the hidden developer
+    /// option ([`Settings::dev_offline`]) forces it on.
+    pub fn offline_play_allowed(&self) -> bool {
+        self.offline_play.unwrap_or(true) || self.dev_offline
     }
     /// How many of the newest release versions pruning keeps: at least the newest.
     pub fn keep_newest(&self) -> usize {

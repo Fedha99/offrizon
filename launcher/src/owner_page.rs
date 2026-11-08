@@ -14,11 +14,11 @@ impl Launcher {
             && self.opening.is_none()
     }
 
-    /// `owner` as the window shows it: the developer option that lets offline names play without
-    /// an owner (`dev_options`) hides the gate, as if the keychain hadn't answered yet.
+    /// `owner` as the window shows it: offline play (`Settings::offline_play`, on in Offrizon)
+    /// hides the gate, as if the keychain hadn't answered yet.
     pub(crate) fn owner_shown(&self) -> Option<bool> {
         match self.owner {
-            Some(false) if self.settings.dev_offline => None,
+            Some(false) if self.settings.offline_play_allowed() => None,
             owner => owner,
         }
     }

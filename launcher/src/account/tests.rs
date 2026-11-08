@@ -738,9 +738,11 @@ fn the_developer_option_plays_offline_names_without_an_owner() {
     assert_eq!(accounts.player(), Player::Offline("Builder_1".into()));
     assert_eq!(accounts.name_arg(), Some("Builder_1"));
     // The game starts offline: no request, no session, and no owner to download the game for.
+    // It says why it plays without a session (the window and the terminal show it).
     let (m, ep) = mock(|_| {});
     let pass = launch_for_game(&ep, Some("test-client"), &store, &mut accounts, true).unwrap();
-    assert!(pass.session.is_none() && pass.owner.is_none() && pass.offline.is_none());
+    assert!(pass.session.is_none() && pass.owner.is_none());
+    assert_eq!(pass.offline.as_deref(), Some(OFFLINE_PLAY_WHY));
     assert!(m.lock().unwrap().log.is_empty());
     // Beside an account the services say doesn't own the game: the same, still no owner.
     let (_, ep) = mock(|m| m.owns_game = false);
@@ -2287,6 +2289,7 @@ fn a_launch_as_another_account_leaves_the_selected_one() {
         &store,
         &mut accounts,
         &Player::Microsoft(alex.into()),
+        false,
     )
     .unwrap();
     assert!(pass.session.is_none());
@@ -2302,6 +2305,7 @@ fn a_launch_as_another_account_leaves_the_selected_one() {
         &store,
         &mut accounts,
         &Player::Microsoft("not-signed-in".into()),
+        false,
     );
     assert_eq!(gone.unwrap_err(), "That account isn't signed in.");
     assert_eq!(accounts.player(), Player::Microsoft(UUID.into()));

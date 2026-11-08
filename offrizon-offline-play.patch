@@ -1,0 +1,476 @@
+diff --git a/.github/workflows/fork-windows.yml b/.github/workflows/fork-windows.yml
+new file mode 100644
+index 0000000..f386600
+--- /dev/null
++++ b/.github/workflows/fork-windows.yml
+@@ -0,0 +1,101 @@
++name: fork windows build
++# Offrizon's Windows x64 builds, as workflow artifacts (no release, no signing):
++#   - the offline launcher (owner gate relaxed, offline play on by default), and
++#   - the game client and its tools, to import with the launcher's "Import a game build…".
++# HORIZON_FORK=1 is built into the launcher: it never self-updates from horizon-rust/horizon's
++# releases, which would bring the owner gate back and undo the rebrand. Run by hand
++# (workflow_dispatch) or on a push that touches the launcher or the game.
++on:
++  workflow_dispatch:
++  push:
++    branches: [main, master, offrizon-rebrand]
++    paths:
++      - 'launcher/**'
++      - 'crates/**'
++      - '.github/workflows/fork-windows.yml'
++
++permissions:
++  contents: read
++
++env:
++  # Test and smoke runs never reach the telemetry server.
++  HORIZON_TELEMETRY_URL: "off"
++  # Marks the launcher as this fork's build (see backend::self_update_allowed).
++  HORIZON_FORK: "1"
++
++jobs:
++  launcher:
++    name: launcher windows x64
++    runs-on: windows-latest
++    timeout-minutes: 60
++    defaults:
++      run:
++        working-directory: launcher
++        shell: bash
++    env:
++      # The C runtime linked in, so the standalone launcher needs no redistributable.
++      RUSTFLAGS: -C target-feature=+crt-static
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          persist-credentials: false
++      - uses: dtolnay/rust-toolchain@stable
++      - uses: Swatinem/rust-cache@v2
++        with:
++          workspaces: launcher
++          shared-key: fork-launcher-windows
++      - run: cargo build --release --locked
++      - name: Package
++        shell: bash
++        run: |
++          mkdir -p out
++          short=${GITHUB_SHA::8}
++          cp target/release/horizon-launcher.exe out/
++          (cd out && 7z a offrizon-launcher-$short-windows-x64.zip horizon-launcher.exe)
++          cp target/release/horizon-launcher.exe out/offrizon-launcher-setup.exe
++          rm out/horizon-launcher.exe
++          ls -l out
++      - uses: actions/upload-artifact@v4
++        with:
++          name: offrizon-launcher-windows-x64
++          path: launcher/out/*
++          retention-days: 14
++
++  game:
++    name: game windows x64
++    runs-on: windows-latest
++    timeout-minutes: 120
++    defaults:
++      run:
++        shell: bash
++    env:
++      # The C runtime linked in, so the game runs without the Visual C++ redistributable.
++      RUSTFLAGS: -C target-feature=+crt-static
++    steps:
++      - uses: actions/checkout@v4
++        with:
++          persist-credentials: false
++      - uses: dtolnay/rust-toolchain@stable
++      - uses: Swatinem/rust-cache@v2
++        with:
++          workspaces: .
++          shared-key: fork-game-windows
++      - run: cargo build --release --locked -p horizon-client -p horizon-client-lib --bin horizon-client --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
++      - name: Package
++        shell: bash
++        run: |
++          mkdir -p out/dist
++          short=${GITHUB_SHA::8}
++          for b in horizon-client horizon-ctl horizon-prepare horizon-server; do
++            test -f target/release/$b.exe || { echo "::error::target/release/$b.exe is missing"; exit 1; }
++            cp target/release/$b.exe out/dist/
++          done
++          (cd out/dist && 7z a ../offrizon-client-$short-windows-x64.zip \
++            horizon-client.exe horizon-ctl.exe horizon-prepare.exe horizon-server.exe)
++          rm -rf out/dist
++          ls -l out
++      - uses: actions/upload-artifact@v4
++        with:
++          name: offrizon-client-windows-x64
++          path: out/*
++          retention-days: 14
+diff --git a/launcher/src/account.rs b/launcher/src/account.rs
+index 6a359c7..05af5ac 100644
+--- a/launcher/src/account.rs
++++ b/launcher/src/account.rs
+@@ -1699,9 +1699,10 @@ impl Accounts {
+     }
+ 
+     /// Plays as `who`: an account, an offline name, or the game's own name. Offrizon: offline
+-    /// names play without an account that owns the game, so this always passes them.
++    /// names play without an account that owns the game, unless offline play is off
++    /// (`backend::Settings::offline_play`).
+     pub fn play_as(&mut self, store: &dyn SecretStore, who: Player) -> Result<(), String> {
+-        self.play_as_with(store, who, true)
++        self.play_as_with(store, who, crate::backend::Settings::load().offline_play_allowed())
+     }
+ 
+     /// [`Self::play_as`], where `offline_without_owner` (the window's hidden developer option,
+@@ -1937,10 +1938,14 @@ pub fn launch(
+     }
+ }
+ 
+-/// The owner gate before the game starts. With the window's hidden developer option
+-/// (`backend::Settings::dev_offline`, `offline_without_owner`) no owner is no refusal: the game
+-/// starts offline, without a session and without an `owner`. Downloads never come through here:
+-/// `backend::download_for_owner` asks [`launch`] itself, so the option never downloads the game.
++/// Why an offline-play launch ([`launch_for_game`], [`launch_as`]) starts with no session.
++const OFFLINE_PLAY_WHY: &str =
++    "no Microsoft account that owns Minecraft: Java Edition is signed in";
++
++/// The owner gate before the game starts. With offline play (`offline_without_owner`,
++/// `backend::Settings::offline_play_allowed`) no owner is no refusal: the game starts offline,
++/// without a session and without an `owner`. Downloads never come through here:
++/// `backend::download_for_owner` asks [`launch`] itself, so offline play never downloads the game.
+ pub fn launch_for_game(
+     ep: &Endpoints,
+     client_id: Option<&str>,
+@@ -1949,7 +1954,10 @@ pub fn launch_for_game(
+     offline_without_owner: bool,
+ ) -> Result<Launch, NoOwner> {
+     match launch(ep, client_id, store, accounts) {
+-        Err(NoOwner) if offline_without_owner => Ok(Launch::default()),
++        Err(NoOwner) if offline_without_owner => Ok(Launch {
++            offline: Some(OFFLINE_PLAY_WHY.to_string()),
++            ..Launch::default()
++        }),
+         pass => pass,
+     }
+ }
+@@ -2215,8 +2223,13 @@ pub fn session_for_game(
+ /// [`session_for_game`] for one launch as `who` (`play --account`, a signed-in account): who
+ /// plays changes for this launch only, so several games can play as several accounts at once
+ /// (#4952). What the services renewed (tokens, names, skins) is still kept; which account
+-/// `account select` picked is not touched.
+-pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession, String> {
++/// `account select` picked is not touched. `offline_without_owner`: see [`launch_for_game`]; an
++/// offline `who` plays without an owner, as a Microsoft account's own refusal is kept.
++pub fn session_for_game_as(
++    game_home: &Path,
++    who: &Player,
++    offline_without_owner: bool,
++) -> Result<GameSession, String> {
+     let mut accounts = Accounts::load();
+     let pass = launch_as(
+         &Endpoints::live(),
+@@ -2224,6 +2237,7 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
+         store(),
+         &mut accounts,
+         who,
++        offline_without_owner,
+     );
+     if let Err(e) = accounts.save() {
+         eprintln!("Offrizon: the accounts are not saved: {e}");
+@@ -2241,20 +2255,24 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
+ }
+ 
+ /// The owner gate as `who`, on `accounts`, which keeps its choice of player.
++/// `offline_without_owner`: see [`launch_for_game`]; an offline `who` then plays with no owner,
++/// a Microsoft account's refusal stays.
+ fn launch_as(
+     ep: &Endpoints,
+     client_id: Option<&str>,
+     store: &dyn SecretStore,
+     accounts: &mut Accounts,
+     who: &Player,
++    offline_without_owner: bool,
+ ) -> Result<Launch, String> {
+     let chosen = (
+         accounts.selected.clone(),
+         accounts.offline_selected.clone(),
+         accounts.offline.clone(),
+     );
+-    let pass = accounts.play_as(store, who.clone()).and_then(|()| {
+-        launch_for_game(ep, client_id, store, accounts, true).map_err(|e| e.to_string())
++    let pass = accounts.play_as_with(store, who.clone(), offline_without_owner).and_then(|()| {
++        launch_for_game(ep, client_id, store, accounts, offline_without_owner)
++            .map_err(|e| e.to_string())
+     });
+     (
+         accounts.selected,
+diff --git a/launcher/src/account/tests.rs b/launcher/src/account/tests.rs
+index 388869c..55268bc 100644
+--- a/launcher/src/account/tests.rs
++++ b/launcher/src/account/tests.rs
+@@ -738,9 +738,11 @@ fn the_developer_option_plays_offline_names_without_an_owner() {
+     assert_eq!(accounts.player(), Player::Offline("Builder_1".into()));
+     assert_eq!(accounts.name_arg(), Some("Builder_1"));
+     // The game starts offline: no request, no session, and no owner to download the game for.
++    // It says why it plays without a session (the window and the terminal show it).
+     let (m, ep) = mock(|_| {});
+     let pass = launch_for_game(&ep, Some("test-client"), &store, &mut accounts, true).unwrap();
+-    assert!(pass.session.is_none() && pass.owner.is_none() && pass.offline.is_none());
++    assert!(pass.session.is_none() && pass.owner.is_none());
++    assert_eq!(pass.offline.as_deref(), Some(OFFLINE_PLAY_WHY));
+     assert!(m.lock().unwrap().log.is_empty());
+     // Beside an account the services say doesn't own the game: the same, still no owner.
+     let (_, ep) = mock(|m| m.owns_game = false);
+@@ -2287,6 +2289,7 @@ fn a_launch_as_another_account_leaves_the_selected_one() {
+         &store,
+         &mut accounts,
+         &Player::Microsoft(alex.into()),
++        false,
+     )
+     .unwrap();
+     assert!(pass.session.is_none());
+@@ -2302,6 +2305,7 @@ fn a_launch_as_another_account_leaves_the_selected_one() {
+         &store,
+         &mut accounts,
+         &Player::Microsoft("not-signed-in".into()),
++        false,
+     );
+     assert_eq!(gone.unwrap_err(), "That account isn't signed in.");
+     assert_eq!(accounts.player(), Player::Microsoft(UUID.into()));
+diff --git a/launcher/src/backend.rs b/launcher/src/backend.rs
+index 747d36c..c2d80aa 100644
+--- a/launcher/src/backend.rs
++++ b/launcher/src/backend.rs
+@@ -3180,9 +3180,13 @@ pub fn client_as(tag: &str, who: Option<&account::Player>) -> Result<Command, St
+     if let Some(error) = game_architecture_launch_error(tag) {
+         return Err(error);
+     }
++    let offline_without_owner = Settings::load().offline_play_allowed();
+     let session = match who {
+-        None => account::session_for_game(&game_home(), false).map_err(|e| e.to_string()),
+-        Some(who) => account::session_for_game_as(&game_home(), who),
++        None => {
++            account::session_for_game(&game_home(), offline_without_owner)
++                .map_err(|e| e.to_string())
++        }
++        Some(who) => account::session_for_game_as(&game_home(), who, offline_without_owner),
+     }
+     .map_err(|refused| format!("{refused} {}", crate::i18n::tr(SIGN_IN_HINT)))?;
+     if let Err(e) = need_prepared(tag) {
+@@ -3539,9 +3543,13 @@ fn launcher_asset_running_from(appimage: bool) -> Option<&'static str> {
+     }
+ }
+ 
+-/// Development builds and `HORIZON_LAUNCHER_NO_SELF_UPDATE` never replace themselves.
++/// Development builds, `HORIZON_LAUNCHER_NO_SELF_UPDATE`, and Offrizon (built with
++/// `HORIZON_FORK=1`: it would otherwise replace itself with horizon-rust/horizon's release,
++/// which would bring the owner gate back and undo the rebrand) never replace themselves.
+ pub fn self_update_allowed() -> bool {
+-    !cfg!(debug_assertions) && std::env::var_os("HORIZON_LAUNCHER_NO_SELF_UPDATE").is_none()
++    !cfg!(debug_assertions)
++        && std::env::var_os("HORIZON_LAUNCHER_NO_SELF_UPDATE").is_none()
++        && option_env!("HORIZON_FORK").is_none()
+ }
+ 
+ /// The version in `horizon-launcher --version`'s output (`horizon-launcher 0.1.5`).
+@@ -4511,6 +4519,11 @@ pub struct Settings {
+     /// comes from the player's own install. Off by default, and absent from the file while off.
+     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+     pub dev_offline: bool,
++    /// Offline play: the game starts with no Microsoft account that owns Minecraft, from an
++    /// offline name or the game's own. Offrizon plays offline by default; `false` brings the
++    /// owner gate back. Unset is on, and absent from the file while unset.
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub offline_play: Option<bool>,
+ }
+ 
+ impl Settings {
+@@ -4597,6 +4610,11 @@ impl Settings {
+     pub fn auto_updates_mods(&self) -> bool {
+         self.mods_auto_update.unwrap_or(true)
+     }
++    /// Offline play ([`Settings::offline_play`]): on unless turned off; the hidden developer
++    /// option ([`Settings::dev_offline`]) forces it on.
++    pub fn offline_play_allowed(&self) -> bool {
++        self.offline_play.unwrap_or(true) || self.dev_offline
++    }
+     /// How many of the newest release versions pruning keeps: at least the newest.
+     pub fn keep_newest(&self) -> usize {
+         self.keep_versions.unwrap_or(KEEP_NEWEST).max(1)
+diff --git a/launcher/src/glass_settings.rs b/launcher/src/glass_settings.rs
+index 74d5d62..3776ee4 100644
+--- a/launcher/src/glass_settings.rs
++++ b/launcher/src/glass_settings.rs
+@@ -240,6 +240,34 @@ impl Launcher {
+         )
+     }
+ 
++    /// The Game card's switch for offline play (`Settings::offline_play`): the game starts with
++    /// just a player name, no Microsoft account, and keeps working with no internet.
++    fn offline_play_row(&mut self, cx: &mut Context<Self>) -> Div {
++        let t = self.theme;
++        let on = self.settings.offline_play_allowed();
++        ui::setting_row(
++            tr("Play offline without an account"),
++            Some(
++                div()
++                    .child(tr(
++                        "The game starts with just a player name, no Microsoft account, and \
++                         keeps working with no internet. Minecraft's files still come from \
++                         your own install.",
++                    ))
++                    .into_any_element(),
++            ),
++            Some(
++                crate::switch("offline-play", on, &t)
++                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
++                        this.settings.offline_play = Some(!this.settings.offline_play_allowed());
++                        this.save_settings();
++                        cx.notify();
++                    }))
++                    .into_any_element(),
++            ),
++        )
++    }
++
+     /// The Game card's switch for registry mods' automatic updates (`horizon::auto`).
+     fn mods_auto_update_row(&mut self, cx: &mut Context<Self>) -> Div {
+         let t = self.theme;
+@@ -449,6 +477,7 @@ impl Launcher {
+         let game = card()
+             .child(self.game_architecture_row(n, cx))
+             .child(self.game_args_row(n + 1, cx))
++            .child(self.offline_play_row(cx))
+             .child(self.mods_auto_update_row(cx))
+             .child(self.native_mods_row(cx));
+         let ai = card()
+diff --git a/launcher/src/main.rs b/launcher/src/main.rs
+index d0cffd7..046693e 100644
+--- a/launcher/src/main.rs
++++ b/launcher/src/main.rs
+@@ -1896,7 +1896,7 @@ impl Launcher {
+         self.starting_client = Some(tag.clone());
+         self.play_pressed = Some(Instant::now());
+         let tx = self.tx.clone();
+-        let offline_without_owner = true;
++        let offline_without_owner = self.settings.offline_play_allowed();
+         // Registry mods update before the game reads them (`horizon::auto`); native mods only
+         // at start, where a build can follow.
+         let auto = self
+@@ -4066,6 +4066,26 @@ impl Launcher {
+                     .child(group("Game", "gamepad"))
+                     .child(self.game_architecture_row(n + 5, cx))
+                     .child(self.game_args_row(n + 6, cx))
++                    .child(index_row(
++                        n + 7,
++                        tr("Play offline without an account"),
++                        Some(plain(
++                            "The game starts with just a player name, no Microsoft account, and \
++                             keeps working with no internet. Minecraft's files still come from \
++                             your own install.",
++                        )),
++                        Some(
++                            switch("offline-play", self.settings.offline_play_allowed(), &t)
++                                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
++                                    this.settings.offline_play =
++                                        Some(!this.settings.offline_play_allowed());
++                                    this.save_settings();
++                                    cx.notify();
++                                }))
++                                .into_any_element(),
++                        ),
++                        &t,
++                    ))
+                     .child(group("AI", "terminal"))
+                     .child(self.no_ai_row(n + 6, cx))
+                     .child(group("About", "info-box"))
+diff --git a/launcher/src/owner_page.rs b/launcher/src/owner_page.rs
+index 8dcecc9..d5fdd1e 100644
+--- a/launcher/src/owner_page.rs
++++ b/launcher/src/owner_page.rs
+@@ -14,11 +14,11 @@ impl Launcher {
+             && self.opening.is_none()
+     }
+ 
+-    /// `owner` as the window shows it: the developer option that lets offline names play without
+-    /// an owner (`dev_options`) hides the gate, as if the keychain hadn't answered yet.
++    /// `owner` as the window shows it: offline play (`Settings::offline_play`, on in Offrizon)
++    /// hides the gate, as if the keychain hadn't answered yet.
+     pub(crate) fn owner_shown(&self) -> Option<bool> {
+         match self.owner {
+-            Some(false) if self.settings.dev_offline => None,
++            Some(false) if self.settings.offline_play_allowed() => None,
+             owner => owner,
+         }
+     }
+diff --git a/launcher/src/switch_page.rs b/launcher/src/switch_page.rs
+index 313c83c..6d38167 100644
+--- a/launcher/src/switch_page.rs
++++ b/launcher/src/switch_page.rs
+@@ -25,7 +25,7 @@ impl Launcher {
+     pub(super) fn play_as(&mut self, who: Player) {
+         let mut accounts = Accounts::load();
+         let done = accounts
+-            .play_as_with(account::store(), who, true)
++            .play_as_with(account::store(), who, self.settings.offline_play_allowed())
+             .and_then(|()| accounts.save());
+         match done {
+             Ok(()) => self.accounts = accounts,
+diff --git a/launcher/tests/owner_gate.rs b/launcher/tests/owner_gate.rs
+index 3a78692..e306eca 100644
+--- a/launcher/tests/owner_gate.rs
++++ b/launcher/tests/owner_gate.rs
+@@ -7,8 +7,9 @@ use std::process::{Command, Output, Stdio};
+ const REFUSED: &str = "Sign in with a Microsoft account that owns Minecraft: Java Edition to play.";
+ 
+ /// Fresh homes with one installed (not prepared) version and an offline name, as a player who
+-/// played offline before the gate has.
+-fn home(name: &str) -> PathBuf {
++/// played offline before the gate has. `offline_play`: whether Offrizon's offline play setting
++/// is on (`settings.json` without it is on).
++fn home(name: &str, offline_play: bool) -> PathBuf {
+     let root =
+         std::env::temp_dir().join(format!("horizon-owner-gate-{name}-{}", std::process::id()));
+     let _ = std::fs::remove_dir_all(&root);
+@@ -20,6 +21,9 @@ fn home(name: &str) -> PathBuf {
+         r#"{"accounts":[],"selected":null,"offline":["Builder_1"],"offline_selected":"Builder_1"}"#,
+     )
+     .unwrap();
++    if !offline_play {
++        std::fs::write(root.join("launcher/settings.json"), r#"{"offline_play":false}"#).unwrap();
++    }
+     root
+ }
+ 
+@@ -45,7 +49,7 @@ fn text(out: &Output) -> String {
+ 
+ #[test]
+ fn the_cli_refuses_to_play_without_an_owner() {
+-    let root = home("cli");
++    let root = home("cli", false);
+     let out = launcher(&root, &["play"]).output().unwrap();
+     let said = text(&out);
+     assert!(!out.status.success(), "{said}");
+@@ -58,9 +62,21 @@ fn the_cli_refuses_to_play_without_an_owner() {
+     let _ = std::fs::remove_dir_all(&root);
+ }
+ 
++/// Offrizon's offline play is on unless turned off: with no account at all, `play` gets past
++/// the owner gate and stops later, at the version's missing preparation.
++#[test]
++fn the_cli_plays_offline_without_an_account() {
++    let root = home("cli-offline", true);
++    let out = launcher(&root, &["play"]).output().unwrap();
++    let said = text(&out);
++    assert!(!said.contains(REFUSED), "{said}");
++    assert!(said.contains("is not prepared yet"), "{said}");
++    let _ = std::fs::remove_dir_all(&root);
++}
++
+ #[test]
+ fn the_mcp_server_refuses_to_play_without_an_owner() {
+-    let root = home("mcp");
++    let root = home("mcp", false);
+     let mut child = launcher(&root, &["mcp"])
+         .stdin(Stdio::piped())
+         .stdout(Stdio::piped())

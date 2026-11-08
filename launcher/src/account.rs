@@ -1699,9 +1699,10 @@ impl Accounts {
     }
 
     /// Plays as `who`: an account, an offline name, or the game's own name. Offrizon: offline
-    /// names play without an account that owns the game, so this always passes them.
+    /// names play without an account that owns the game, unless offline play is off
+    /// (`backend::Settings::offline_play`).
     pub fn play_as(&mut self, store: &dyn SecretStore, who: Player) -> Result<(), String> {
-        self.play_as_with(store, who, true)
+        self.play_as_with(store, who, crate::backend::Settings::load().offline_play_allowed())
     }
 
     /// [`Self::play_as`], where `offline_without_owner` (the window's hidden developer option,
@@ -1937,10 +1938,14 @@ pub fn launch(
     }
 }
 
-/// The owner gate before the game starts. With the window's hidden developer option
-/// (`backend::Settings::dev_offline`, `offline_without_owner`) no owner is no refusal: the game
-/// starts offline, without a session and without an `owner`. Downloads never come through here:
-/// `backend::download_for_owner` asks [`launch`] itself, so the option never downloads the game.
+/// Why an offline-play launch ([`launch_for_game`], [`launch_as`]) starts with no session.
+const OFFLINE_PLAY_WHY: &str =
+    "no Microsoft account that owns Minecraft: Java Edition is signed in";
+
+/// The owner gate before the game starts. With offline play (`offline_without_owner`,
+/// `backend::Settings::offline_play_allowed`) no owner is no refusal: the game starts offline,
+/// without a session and without an `owner`. Downloads never come through here:
+/// `backend::download_for_owner` asks [`launch`] itself, so offline play never downloads the game.
 pub fn launch_for_game(
     ep: &Endpoints,
     client_id: Option<&str>,
@@ -1949,7 +1954,10 @@ pub fn launch_for_game(
     offline_without_owner: bool,
 ) -> Result<Launch, NoOwner> {
     match launch(ep, client_id, store, accounts) {
-        Err(NoOwner) if offline_without_owner => Ok(Launch::default()),
+        Err(NoOwner) if offline_without_owner => Ok(Launch {
+            offline: Some(OFFLINE_PLAY_WHY.to_string()),
+            ..Launch::default()
+        }),
         pass => pass,
     }
 }
@@ -2215,8 +2223,13 @@ pub fn session_for_game(
 /// [`session_for_game`] for one launch as `who` (`play --account`, a signed-in account): who
 /// plays changes for this launch only, so several games can play as several accounts at once
 /// (#4952). What the services renewed (tokens, names, skins) is still kept; which account
-/// `account select` picked is not touched.
-pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession, String> {
+/// `account select` picked is not touched. `offline_without_owner`: see [`launch_for_game`]; an
+/// offline `who` plays without an owner, as a Microsoft account's own refusal is kept.
+pub fn session_for_game_as(
+    game_home: &Path,
+    who: &Player,
+    offline_without_owner: bool,
+) -> Result<GameSession, String> {
     let mut accounts = Accounts::load();
     let pass = launch_as(
         &Endpoints::live(),
@@ -2224,6 +2237,7 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
         store(),
         &mut accounts,
         who,
+        offline_without_owner,
     );
     if let Err(e) = accounts.save() {
         eprintln!("Offrizon: the accounts are not saved: {e}");
@@ -2241,20 +2255,24 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
 }
 
 /// The owner gate as `who`, on `accounts`, which keeps its choice of player.
+/// `offline_without_owner`: see [`launch_for_game`]; an offline `who` then plays with no owner,
+/// a Microsoft account's refusal stays.
 fn launch_as(
     ep: &Endpoints,
     client_id: Option<&str>,
     store: &dyn SecretStore,
     accounts: &mut Accounts,
     who: &Player,
+    offline_without_owner: bool,
 ) -> Result<Launch, String> {
     let chosen = (
         accounts.selected.clone(),
         accounts.offline_selected.clone(),
         accounts.offline.clone(),
     );
-    let pass = accounts.play_as(store, who.clone()).and_then(|()| {
-        launch_for_game(ep, client_id, store, accounts, true).map_err(|e| e.to_string())
+    let pass = accounts.play_as_with(store, who.clone(), offline_without_owner).and_then(|()| {
+        launch_for_game(ep, client_id, store, accounts, offline_without_owner)
+            .map_err(|e| e.to_string())
     });
     (
         accounts.selected,

@@ -240,6 +240,34 @@ impl Launcher {
         )
     }
 
+    /// The Game card's switch for offline play (`Settings::offline_play`): the game starts with
+    /// just a player name, no Microsoft account, and keeps working with no internet.
+    fn offline_play_row(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        let on = self.settings.offline_play_allowed();
+        ui::setting_row(
+            tr("Play offline without an account"),
+            Some(
+                div()
+                    .child(tr(
+                        "The game starts with just a player name, no Microsoft account, and \
+                         keeps working with no internet. Minecraft's files still come from \
+                         your own install.",
+                    ))
+                    .into_any_element(),
+            ),
+            Some(
+                crate::switch("offline-play", on, &t)
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.settings.offline_play = Some(!this.settings.offline_play_allowed());
+                        this.save_settings();
+                        cx.notify();
+                    }))
+                    .into_any_element(),
+            ),
+        )
+    }
+
     /// The Game card's switch for registry mods' automatic updates (`horizon::auto`).
     fn mods_auto_update_row(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
@@ -449,6 +477,7 @@ impl Launcher {
         let game = card()
             .child(self.game_architecture_row(n, cx))
             .child(self.game_args_row(n + 1, cx))
+            .child(self.offline_play_row(cx))
             .child(self.mods_auto_update_row(cx))
             .child(self.native_mods_row(cx));
         let ai = card()
