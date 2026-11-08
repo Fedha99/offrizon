@@ -1,4 +1,4 @@
-//! The Wardrobe's link to Horizon's cosmetics service ([docs/cosmetics.md](../../docs/cosmetics.md)):
+//! The Wardrobe's link to Offrizon's cosmetics service ([docs/cosmetics.md](../../docs/cosmetics.md)):
 //! the catalogue, the account's own items and purchase history, what each slot wears and whether
 //! others see it, and whether the Wardrobe has anything to show yet (`Service::shop`). Buying and
 //! claiming happen on the website ([`SHOP_URL`]), except the founder set's free claim for players
@@ -43,7 +43,7 @@ impl Error {
     pub fn message(&self) -> String {
         match self {
             Self::Offline => {
-                tr("Could not reach Horizon's cosmetics service. Check your internet connection.")
+                tr("Could not reach Offrizon's cosmetics service. Check your internet connection.")
                     .into()
             }
             Self::Account(e) => tr(e).into(),
@@ -66,7 +66,7 @@ impl Error {
             })
             .into(),
             Self::Service(_) => {
-                tr("Horizon's cosmetics service had a problem. Try again later.").into()
+                tr("Offrizon's cosmetics service had a problem. Try again later.").into()
             }
         }
     }

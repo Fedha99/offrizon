@@ -1,6 +1,6 @@
 //! What an instance's icon shows (plan R8): its own picture (one the player chose, or its
 //! modpack's icon) first; else the block or colour chosen in its dialog; else its mark: the loader
-//! it plays with, the grass block for plain Minecraft, Horizon's own for Horizon. The letter tile
+//! it plays with, the grass block for plain Minecraft, Offrizon's own for Offrizon. The letter tile
 //! is the last resort. Each is decoded once per size and kept in `Instances::icons`.
 use super::*;
 use gpui::RenderImage;
@@ -16,7 +16,7 @@ const NEOFORGE: &[u8] = include_bytes!("../assets/logos/neoforge.png");
 const FORGE: &[u8] = include_bytes!("../assets/logos/forge.png");
 /// Vanilla's mark: our own grass block (`tools/launcher_grass_block.py`), not Mojang's art.
 pub(super) const GRASS: &[u8] = include_bytes!("../assets/logos/grass-block.png");
-/// Horizon's mark (`docs/media/brand/icon.svg`), as the icon theme holds it.
+/// Offrizon's mark (`docs/media/brand/icon.svg`), as the icon theme holds it.
 const MARK: &[u8] = include_bytes!("../../packaging/icons/hicolor/256x256/apps/horizon.png");
 /// The loaders a logo is drawn for.
 const LOADERS: [&str; 4] = ["fabric", "quilt", "forge", "neoforge"];
@@ -66,7 +66,7 @@ impl Launcher {
         self.icon_image("mark:grass".into(), size, false, || Some(GRASS.to_vec()))
     }
 
-    /// Horizon's own mark, `size` points square: the brand icon, its tile already rounded.
+    /// Offrizon's own mark, `size` points square: the brand icon, its tile already rounded.
     pub(super) fn horizon_mark(&mut self, size: f32) -> AnyElement {
         match self.icon_image("mark:horizon".into(), size, false, || Some(MARK.to_vec())) {
             Some(image) => centred(image, size, self.scale).into_any_element(),

@@ -65,7 +65,7 @@ pub fn state(enabled: &[Mod], built: Option<&[Mod]>) -> State {
 pub struct Build {
     /// The release or Nightly it was built on (`native_mods::About::base`).
     pub base: String,
-    /// The Horizon commit it compiled.
+    /// The Offrizon commit it compiled.
     pub horizon: String,
     /// The mods whose pin made it compile `horizon` rather than `base`'s own commit.
     pub pinned_by: Vec<String>,
@@ -93,7 +93,7 @@ impl Build {
         }
     }
 
-    /// The Horizon it was built on, as a player reads it (`horizon_label`).
+    /// The Offrizon it was built on, as a player reads it (`horizon_label`).
     pub fn horizon(&self) -> String {
         horizon_label(&self.base)
     }
@@ -107,7 +107,7 @@ impl Build {
     }
 }
 
-/// A release or Nightly as a player reads it beside "Horizon": `v0.2.93` as it is,
+/// A release or Nightly as a player reads it beside "Offrizon": `v0.2.93` as it is,
 /// `nightly-2026-10-29-4baa571` as `Nightly 2026-10-29`.
 pub fn horizon_label(version: &str) -> String {
     match crate::nightly::date_of(version) {
@@ -137,7 +137,7 @@ pub fn enabled(home: &Path) -> Vec<Mod> {
     out
 }
 
-/// The native mods turned on in game folder `home` that pin Horizon commit `revision` (those naming
+/// The native mods turned on in game folder `home` that pin Offrizon commit `revision` (those naming
 /// a hook points' version follow the others, so they pin nothing).
 pub fn pinning(home: &Path, revision: &str) -> Vec<String> {
     bundles_on(home)
@@ -313,7 +313,7 @@ mod tests {
         .unwrap();
         installed::Installed {
             entries: vec![installed::Entry {
-                source: SourceId::Horizon,
+                source: SourceId::Offrizon,
                 project: "registry".into(),
                 slug: "registry".into(),
                 title: "Registry mod".into(),

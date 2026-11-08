@@ -209,13 +209,13 @@ impl Launcher {
         )
     }
 
-    /// What the dialog has `editing` play: Horizon, or a Java game with its loader. The loader
+    /// What the dialog has `editing` play: Offrizon, or a Java game with its loader. The loader
     /// keeps its version while its kind and Minecraft stay; a new one's (empty here) is the
     /// newest stable, asked of its service on Save.
     pub(super) fn draft_plays(&self, editing: &Instance) -> Option<Plays> {
         let d = self.instances.dialog.as_ref()?;
-        if d.java.kind == NewKind::Horizon {
-            return Some(Plays::Horizon);
+        if d.java.kind == NewKind::Offrizon {
+            return Some(Plays::Offrizon);
         }
         let minecraft = self.draft_minecraft()?;
         let loader = (d.java.kind == NewKind::Modded).then(|| {

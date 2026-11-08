@@ -1,6 +1,6 @@
 //! The Shop's rules, beside its page (`wardrobe_page/shop.rs`):
 //!
-//! - Whether the top bar has the Wardrobe and Shop pages at all: only when Horizon's cosmetics
+//! - Whether the top bar has the Wardrobe and Shop pages at all: only when Offrizon's cosmetics
 //!   service says there is something to show, whatever the cosmetics switch says. The service
 //!   decides with its founder-set window (`GET /v1/shop`): the set can be claimed now (the public
 //!   window, or a preview for an account on its list), the account claimed it, or the public

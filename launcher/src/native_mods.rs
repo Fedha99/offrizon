@@ -1,13 +1,13 @@
 //! Native mods (docs/native-mods.md): mixin bundles that
 //! levzzz5154's horizon-mixins (MIT, <https://github.com/horizon-rust/horizon-mixins>) applies to
-//! Horizon's source, which the launcher then compiles into a game of its own with its portable Rust
+//! Offrizon's source, which the launcher then compiles into a game of its own with its portable Rust
 //! ([`rust_toolchain`]). Unlike `.hmod` mods they are not sandboxed: their code runs with the
 //! player's rights.
 //!
-//! A native mod pins the Horizon revision it was made for (a Nightly's or a release's commit).
+//! A native mod pins the Offrizon revision it was made for (a Nightly's or a release's commit).
 //! Mods pinning different ones build on the newest of them, once the player agreed to try (they
-//! often still apply and compile). A mod that hooks only Horizon's native hook points
-//! (`game/native_hooks.rs`) names the version it needs instead (`hooks`): it builds on any Horizon
+//! often still apply and compile). A mod that hooks only Offrizon's native hook points
+//! (`game/native_hooks.rs`) names the version it needs instead (`hooks`): it builds on any Offrizon
 //! whose hook points have that version or a later one (they are only ever added to), the player's own
 //! by default, so such mods always build together. The build compiles that revision's source, from
 //! GitHub, never a checkout on this computer, and installs as its own version,
@@ -309,7 +309,7 @@ pub fn classify(exists: bool, before: Option<&Record>, now: &Record) -> Plan {
     if before.horizon != now.horizon {
         let short = |r: &str| r.chars().take(7).collect::<String>();
         changes.push(format!(
-            "Horizon commit {} to {}",
+            "Offrizon commit {} to {}",
             short(&before.horizon),
             short(&now.horizon)
         ));
@@ -650,7 +650,7 @@ pub struct Bundle {
     pub id: String,
     pub version: String,
     pub dir: PathBuf,
-    /// The Horizon commit it builds on (`[compatibility] horizon_revision`, or its `.hnmod`'s).
+    /// The Offrizon commit it builds on (`[compatibility] horizon_revision`, or its `.hnmod`'s).
     pub horizon: Option<String>,
     /// The horizon-mixins commit it was tested with (its `.hnmod`'s).
     pub mixins: Option<String>,
@@ -799,7 +799,7 @@ pub(crate) fn bundle_in(dir: &Path) -> Result<Option<Bundle>, String> {
     let found = bundle(&dir.join("mixins").join(&id), field("mixins"))?;
     match (&found.horizon, field("horizon")) {
         (Some(pinned), Some(native)) if *pinned != native => Err(format!(
-            "{id}: {NATIVE_MANIFEST} pins Horizon {native}, its {MANIFEST} {pinned}."
+            "{id}: {NATIVE_MANIFEST} pins Offrizon {native}, its {MANIFEST} {pinned}."
         )),
         (_, native) => Ok(Some(Bundle {
             horizon: found.horizon.clone().or(native),
@@ -1129,11 +1129,11 @@ fn ask_github(repo: &str, revision: &str) -> Result<String, String> {
         .ok_or_else(|| format!("GitHub doesn't know {repo} commit {revision}."))
 }
 
-/// How [`build`] starts its error when mods pin other Horizon revisions than the one it would
+/// How [`build`] starts its error when mods pin other Offrizon revisions than the one it would
 /// use and the player hasn't agreed to try (`anyway`); the rest lists them.
-pub const MISMATCH: &str = "Made for other Horizon versions: ";
+pub const MISMATCH: &str = "Made for other Offrizon versions: ";
 
-/// Each pinned mod whose Horizon revision isn't `revision`, as `id → pin`, and the build's.
+/// Each pinned mod whose Offrizon revision isn't `revision`, as `id → pin`, and the build's.
 fn mismatch(mods: &[Bundle], revision: &str) -> Option<String> {
     let list: Vec<String> = mods
         .iter()
@@ -1151,7 +1151,7 @@ fn mismatch(mods: &[Bundle], revision: &str) -> Option<String> {
     })
 }
 
-/// Where Horizon declares its native hook points' version, and the line that does.
+/// Where Offrizon declares its native hook points' version, and the line that does.
 const HOOKS_FILE: &str = "crates/horizon-client/src/game/native_hooks.rs";
 const HOOKS_LINE: &str = "pub(crate) const NATIVE_HOOKS_API: u32 = ";
 
@@ -1161,7 +1161,7 @@ fn hooks_in(source: &str) -> Option<u32> {
     line.trim_end().strip_suffix(';')?.parse().ok()
 }
 
-/// The native hook points' version of Horizon at `revision`, from GitHub (None: it has none).
+/// The native hook points' version of Offrizon at `revision`, from GitHub (None: it has none).
 pub(crate) fn hooks_at(revision: &str) -> Option<u32> {
     let url = format!(
         "https://raw.githubusercontent.com/{}/{revision}/{HOOKS_FILE}",
@@ -1184,7 +1184,7 @@ fn catalog_in(text: &str) -> Option<HookCatalog> {
         .collect()
 }
 
-/// The named hook points of Horizon at `revision`, from GitHub (None: it has no catalog, as
+/// The named hook points of Offrizon at `revision`, from GitHub (None: it has no catalog, as
 /// revisions from before d3e0774 that already had hook points v2).
 fn catalog_at(revision: &str) -> Option<HookCatalog> {
     let url = format!(
@@ -1195,7 +1195,7 @@ fn catalog_at(revision: &str) -> Option<HookCatalog> {
     catalog_in(&text)
 }
 
-/// Where Horizon lists its named hook points, at the workspace root (horizon-mixins reads it there).
+/// Where Offrizon lists its named hook points, at the workspace root (horizon-mixins reads it there).
 const CATALOG: &str = "native-hooks.json";
 type HookCatalog = std::collections::BTreeSet<(String, u32)>;
 
@@ -1205,7 +1205,7 @@ type HookCatalog = std::collections::BTreeSet<(String, u32)>;
 /// (`catalog`): hook points v2 came before `native-hooks.json`, so a pin on such a revision
 /// would fail in horizon-mixins (E_HOOK_CATALOG). Else, when nothing pins it, the revision those mods were tested on. Else the
 /// revision of the release or Nightly the build starts from (`game`), when they find theirs
-/// there: a rebuild that stayed on an older Horizon, or mods pinning one, then move to the game
+/// there: a rebuild that stayed on an older Offrizon, or mods pinning one, then move to the game
 /// the player installed, and pinned mods wait for the player's Build anyway ([`mismatch`]).
 fn with_hooks(
     mods: &[Bundle],
@@ -1238,7 +1238,7 @@ fn with_hooks(
     let tested: Vec<Bundle> = hooked.iter().map(|b| (*b).clone()).collect();
     let fallback = agreed(
         &tested,
-        "Horizon",
+        "Offrizon",
         |b| b.horizon.as_ref(),
         || Err(String::new()),
     );
@@ -1258,7 +1258,7 @@ fn with_hooks(
         .map(|b| format!("{} (hook points v{})", b.id, b.hooks.unwrap_or_default()))
         .collect();
     Err(format!(
-        "Horizon {} doesn't have the native hook points these mods use: {}. Update Horizon or the mods.",
+        "Offrizon {} doesn't have the native hook points these mods use: {}. Update Offrizon or the mods.",
         &pinned[..pinned.len().min(7)],
         list.join(", ")
     ))
@@ -1279,7 +1279,7 @@ fn repin(bundle: &Bundle, revision: &str) -> Result<(), String> {
     fs::write(&path, text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
-/// Whether Horizon's source at `source` has the `mods` feature (the WebAssembly mods' runtime,
+/// Whether Offrizon's source at `source` has the `mods` feature (the WebAssembly mods' runtime,
 /// gone from later revisions).
 fn has_mods_feature(source: &Path) -> bool {
     let path = source.join("crates/horizon-client/Cargo.toml");
@@ -1302,7 +1302,7 @@ fn profile_of(source: &Path, chosen: Profile) -> Profile {
     }
 }
 
-/// The Horizon commit `version` (an installed release or Nightly) was built from, from GitHub.
+/// The Offrizon commit `version` (an installed release or Nightly) was built from, from GitHub.
 pub fn revision_of(version: &str) -> Result<String, String> {
     let reference = match version.strip_prefix("nightly-") {
         // nightly-2026-10-28-0c02067: the commit is its last word.
@@ -1326,7 +1326,7 @@ pub fn revision_of(version: &str) -> Result<String, String> {
 pub struct About {
     /// The release or Nightly it started from.
     pub base: String,
-    /// The Horizon commit it compiled.
+    /// The Offrizon commit it compiled.
     pub horizon: String,
     /// What it compiles: the game the player plays (also the only kind a `native-mods.json`
     /// from before the target was recorded builds), or the headless engine a server runs.
@@ -1392,7 +1392,7 @@ fn about_in(dir: &Path) -> Option<About> {
     })
 }
 
-/// The Horizon commit the mods that pin one (`pins`: those naming no hook points' version) give a
+/// The Offrizon commit the mods that pin one (`pins`: those naming no hook points' version) give a
 /// build, and which of them pin it. With `on_base`, the player chose the commit of the version the
 /// build starts from (`base`) whatever the pins say; with no pin, it is `base`'s too. Mods
 /// pinning different commits give the newest of them ([`newest`]).
@@ -1405,7 +1405,7 @@ fn pinned_revision(
     if on_base {
         return Ok((base()?, Vec::new()));
     }
-    let revision = newest(pins, "Horizon", |b| b.horizon.as_ref(), base, None, date)?;
+    let revision = newest(pins, "Offrizon", |b| b.horizon.as_ref(), base, None, date)?;
     let by = pins
         .iter()
         .filter(|b| b.horizon.as_ref() == Some(&revision))
@@ -1422,7 +1422,7 @@ pub(crate) fn newest_installed(installed: &[String]) -> Option<&String> {
 }
 
 /// The installed version a build for an instance that plays `current` starts from: `current`
-/// itself, so a rebuild stays on the Horizon it plays (a native build's own revision, [`about`]).
+/// itself, so a rebuild stays on the Offrizon it plays (a native build's own revision, [`about`]).
 /// With `update`, or when it plays nothing installed, the newest installed release or Nightly.
 /// An imported build is no commit to build on: its game files' version is.
 pub fn base_for(current: Option<&str>, installed: &[String], update: bool) -> Option<String> {
@@ -1433,7 +1433,7 @@ pub fn base_for(current: Option<&str>, installed: &[String], update: bool) -> Op
     }
 }
 
-/// The newer Horizon a build with `update` would move native build `version` to: the newest
+/// The newer Offrizon a build with `update` would move native build `version` to: the newest
 /// installed release or Nightly, when it is newer than the one the build started from.
 pub fn update_for(version: &str, installed: &[String]) -> Option<String> {
     newer_than(&about(version)?.base, installed)
@@ -1498,7 +1498,7 @@ fn files_with_api(dir: &Path, api: Option<&str>) -> Result<Vec<(String, PathBuf)
     Ok(out)
 }
 
-/// The installed version `bundles` built on Horizon `revision` with horizon-mixins `mixins`
+/// The installed version `bundles` built on Offrizon `revision` with horizon-mixins `mixins`
 /// become: `native-<7 digits of the revision>-<12 hex digits>`. The two targets' keys never mix:
 /// a server build salts its hash, so it is another version than the client build of the same
 /// mods, and the client key is unchanged.
@@ -1601,7 +1601,7 @@ pub enum Step {
         name: String,
         profile: Profile,
     },
-    /// The mods' own crates checked against Horizon's `Cargo.lock`.
+    /// The mods' own crates checked against Offrizon's `Cargo.lock`.
     Crates,
     /// A mod's post-build step being built.
     PostBuildCompile(String),
@@ -1630,12 +1630,12 @@ impl Step {
             ),
             Self::Tool => tr("Building horizon-mixins (once)").into(),
             Self::Source(revision) => trf(
-                "Downloading Horizon's source at {revision}",
+                "Downloading Offrizon's source at {revision}",
                 &[("revision", &revision[..7])],
             ),
             Self::Mixins => tr("Applying the mixins").into(),
             Self::CachedMixins => tr("Reusing patched game source").into(),
-            Self::Crates => tr("Checking the mods' crates against Horizon's Cargo.lock").into(),
+            Self::Crates => tr("Checking the mods' crates against Offrizon's Cargo.lock").into(),
             Self::Plan(plan, profile) => format!("{} ({})", plan.label(), profile.name()),
             Self::Compile {
                 done,
@@ -1825,7 +1825,7 @@ fn mod_id_from_file(file: &str) -> Option<&str> {
 
 /// A horizon-mixins diagnostic (`{"code", "message", "file"}`) in one line, led by the mod it
 /// names (`mod_id`, its `injection_id`, or extracted from its `file` path for `E_MODULE_CONFLICT`),
-/// so a player with several mods sees which one doesn't apply to the build's Horizon: their files'
+/// so a player with several mods sees which one doesn't apply to the build's Offrizon: their files'
 /// paths are deep in the launcher's folder.
 fn diagnostic(text: &str) -> Option<String> {
     let start = text.find('{')?;
@@ -1942,10 +1942,10 @@ fn cargo(rust: &Toolchain, dir: &Path, subcommand: &str) -> Command {
     cmd
 }
 
-/// Checks the mods' crates (`native-crates/`) against `source`'s `Cargo.lock`, Horizon's own.
+/// Checks the mods' crates (`native-crates/`) against `source`'s `Cargo.lock`, Offrizon's own.
 /// horizon-mixins already wrote them into `stage`'s lock (and refused a crate the lock lacks,
 /// `E_CRATE_DEPENDENCY`), leaving every other package as it was: this checks that again, a crate
-/// they name must be in Horizon's lock and every package downloaded exactly as there. Then the
+/// they name must be in Offrizon's lock and every package downloaded exactly as there. Then the
 /// crates are fetched, so a feature turning on a dependency the lock lacks fails here, readably.
 fn lock_crates(
     rust: &Toolchain,
@@ -2027,7 +2027,7 @@ fn post_build_programs(
     Ok(out)
 }
 
-/// Horizon's source at commit `revision`: GitHub's archive of it, unpacked once, with the commit in
+/// Offrizon's source at commit `revision`: GitHub's archive of it, unpacked once, with the commit in
 /// `.horizon-revision` (bundles pin it). A Nightly's commit stays downloadable after the Nightly
 /// is gone: its `nightly-source/…` tag keeps it (docs/release-flow.md). Links are left out:
 /// horizon-mixins refuses them, and none is needed to build.
@@ -2196,7 +2196,7 @@ impl From<Failed> for String {
 }
 
 /// The pipeline both targets build with ([`build`], [`build_server`]): `folder`'s mods on the
-/// Horizon revision they pin (else `base`'s, the installed version whose game files the build
+/// Offrizon revision they pin (else `base`'s, the installed version whose game files the build
 /// reuses: a native build's own revision when it is one, [`base_for`]), compiled as `target`
 /// (the game, or the headless engine) and installed as its own version,
 /// `native-<revision>-<key>` (the key hashes the revision, the mods' files, the tool's commit,
@@ -2299,7 +2299,7 @@ fn pipeline(
     let on_base = on_base || built_on.as_ref().is_some_and(|a| a.on_base);
     // The commit of the release or Nightly the build starts from. A native build's own is that
     // of the version it started from when it recorded it; else, outside `on_base`, the commit it
-    // compiled, so a rebuild stays on the Horizon it plays.
+    // compiled, so a rebuild stays on the Offrizon it plays.
     let base_revision = || match &built_on {
         Some(about) => match &about.base_horizon {
             Some(r) => Ok(r.clone()),
@@ -2327,7 +2327,7 @@ fn pipeline(
     }
     if let Some(list) = &other {
         log_warning(&format!(
-            "Some mods were made for other Horizon versions ({list}). Building anyway on {}.",
+            "Some mods were made for other Offrizon versions ({list}). Building anyway on {}.",
             &revision[..revision.len().min(7)]
         ));
     }
@@ -2346,7 +2346,7 @@ fn pipeline(
                 many => format!(" (pinned by {})", many.join(", ")),
             };
             format!(
-                "{e}\n\nSome mods were made for other Horizon versions ({list}{by}), which may be why. Install versions made for the same Nightly."
+                "{e}\n\nSome mods were made for other Offrizon versions ({list}{by}), which may be why. Install versions made for the same Nightly."
             )
         }
         None => e,
@@ -2452,7 +2452,7 @@ fn pipeline(
             // Offline metadata resolves all targets, including packages not fetched for this host.
             let mut fetch = cargo(&rust, &source, "fetch");
             fetch.arg("--locked");
-            run(fetch, "Downloading Horizon's crates", |_| {})?;
+            run(fetch, "Downloading Offrizon's crates", |_| {})?;
         }
         let has_api = api::stage(&fresh, &mods, &declared, &resolution)?;
         if has_api {
@@ -2662,13 +2662,13 @@ fn isolated(
     }
 }
 
-/// Builds `folder`'s mods on the Horizon revision they pin (else `base`'s, the installed version
+/// Builds `folder`'s mods on the Offrizon revision they pin (else `base`'s, the installed version
 /// whose game files the build reuses: a native build's own revision when it is one, [`base_for`])
 /// and points `instance` at the build, the default one included. Returns the build's version; a
 /// build already made is used again. Mods pinning different revisions build on the newest one,
 /// with the newest horizon-mixins they name, only when the player agreed to try (`anyway`): else
 /// the error starts with [`MISMATCH`] and says which. With `on_base`, every mod builds on `base`'s
-/// own commit, pinned or not: the player's Rebuild on Horizon.
+/// own commit, pinned or not: the player's Rebuild on Offrizon.
 pub fn build(
     base: &str,
     folder: &Path,
@@ -2928,7 +2928,7 @@ pub(crate) fn copy_base(from: &Path, to: &Path, target: Target) -> Result<(), St
 /// data behind. A server build is the headless engine: it keeps neither the game's own binary
 /// nor any `horizon-engine` the base shipped, which would run unmodded beside its own.
 fn carried_over(name: &std::ffi::OsStr, target: Target) -> bool {
-    let mut own: Vec<String> = ["Horizon.app", "native-mods.json", "native-data"]
+    let mut own: Vec<String> = ["Offrizon.app", "native-mods.json", "native-data"]
         .iter()
         .map(|s| s.to_string())
         .collect();
@@ -3609,23 +3609,23 @@ mod tests {
             pinned("b", None),
             pinned("c", Some(A)),
         ];
-        assert_eq!(agreed(&same, "Horizon", get, never).unwrap(), A);
+        assert_eq!(agreed(&same, "Offrizon", get, never).unwrap(), A);
         let none = [pinned("a", None)];
-        assert_eq!(agreed(&none, "Horizon", get, || Ok(B.into())).unwrap(), B);
+        assert_eq!(agreed(&none, "Offrizon", get, || Ok(B.into())).unwrap(), B);
         let split = [pinned("veinminer", Some(A)), pinned("minimap", Some(B))];
-        let err = agreed(&split, "Horizon", get, never).unwrap_err();
+        let err = agreed(&split, "Offrizon", get, never).unwrap_err();
         assert!(
             err.contains("veinminer → aaaaaaa") && err.contains("minimap → bbbbbbb"),
             "{err}"
         );
         let bad = [pinned("a", Some("nightly"))];
-        assert!(agreed(&bad, "Horizon", get, never).is_err());
+        assert!(agreed(&bad, "Offrizon", get, never).is_err());
     }
 
     /// A player's report (11-04): Right-Click Crops 1.0.0 pins Nightly 2026-10-31's commit, so
     /// every build of their instance compiled that commit, whatever Nightly or profile they
     /// picked. The pin still chooses by default, and the build now says which mod chose it;
-    /// Rebuild on Horizon (`on_base`) compiles the picked version's own commit.
+    /// Rebuild on Offrizon (`on_base`) compiles the picked version's own commit.
     #[test]
     fn a_pin_chooses_the_commit_unless_the_player_builds_on_the_picked_version() {
         let pinned = |id: &str, horizon: Option<&str>| Bundle {
@@ -3651,7 +3651,7 @@ mod tests {
         assert_eq!(
             pinned_revision(&mods, true, picked, no_date).unwrap(),
             (B.to_owned(), Vec::new()),
-            "Rebuild on Horizon builds on the picked Nightly"
+            "Rebuild on Offrizon builds on the picked Nightly"
         );
         assert_eq!(
             pinned_revision(&mods[1..], false, picked, no_date).unwrap(),
@@ -3698,7 +3698,7 @@ mod tests {
             pinned("zoom", None, None),
         ];
         assert_eq!(
-            newest(&split, "Horizon", horizon, never, None, date).unwrap(),
+            newest(&split, "Offrizon", horizon, never, None, date).unwrap(),
             B
         );
         // horizon-mixins: never older than a pin, and the launcher's own when it is newer.
@@ -3715,11 +3715,11 @@ mod tests {
         let no_date = |_: &str| -> Result<String, String> { panic!("no date needed") };
         let same = [pinned("a", Some(A), None), pinned("b", Some(A), None)];
         assert_eq!(
-            newest(&same, "Horizon", horizon, never, None, no_date).unwrap(),
+            newest(&same, "Offrizon", horizon, never, None, no_date).unwrap(),
             A
         );
         let offline = |_: &str| -> Result<String, String> { Err("offline".into()) };
-        let err = newest(&split, "Horizon", horizon, never, None, offline).unwrap_err();
+        let err = newest(&split, "Offrizon", horizon, never, None, offline).unwrap_err();
         assert!(err.contains("offline"), "{err}");
         // What the player is shown: each mod made for another revision, and the build's.
         assert_eq!(
@@ -3825,7 +3825,7 @@ mod tests {
         );
     }
 
-    /// Players on launcher 0.2.31 (#5352): a rebuild that stayed on an older Horizon (A, hook
+    /// Players on launcher 0.2.31 (#5352): a rebuild that stayed on an older Offrizon (A, hook
     /// points v1), or a mod pinning it, met mods needing newer hook points, tested on different
     /// commits, and the build was refused although the installed game (B) has them all.
     #[test]
@@ -3858,7 +3858,7 @@ mod tests {
         assert_eq!(
             with_hooks(&hooked, A.into(), true, game, at, listed).unwrap(),
             B,
-            "a rebuild that stayed on an older Horizon moves to the game"
+            "a rebuild that stayed on an older Offrizon moves to the game"
         );
         let with_pin = [mod_("carryblock", A, None), mod_("recipes", &d, Some(2))];
         let revision = with_hooks(&with_pin, A.into(), false, game, at, listed).unwrap();
@@ -4527,7 +4527,7 @@ mod tests {
         let plan = classify(false, Some(&before), &next);
         assert_eq!(
             plan.label(),
-            "Incremental rebuild: Horizon commit aaaaaaa to bbbbbbb; mods keys, zoom"
+            "Incremental rebuild: Offrizon commit aaaaaaa to bbbbbbb; mods keys, zoom"
         );
         // A removed mod counts as a change too.
         next = record("aaaaaaa1111", &[("zoom", "1")]);
@@ -4701,8 +4701,8 @@ mod tests {
         fs::remove_dir_all(root).unwrap();
     }
 
-    /// levzzz5154's decision (2026-10-29): a rebuild stays on the Horizon the instance plays;
-    /// only "Rebuild on Horizon {version}" moves it to a newer one.
+    /// levzzz5154's decision (2026-10-29): a rebuild stays on the Offrizon the instance plays;
+    /// only "Rebuild on Offrizon {version}" moves it to a newer one.
     #[test]
     fn a_rebuild_stays_on_the_instances_horizon_until_an_update() {
         let installed: Vec<String> = [
@@ -4871,16 +4871,16 @@ mod tests {
 
     #[test]
     fn tool_errors_read_in_one_line() {
-        let err = "{\n  \"code\": \"E_REVISION\",\n  \"message\": \"requires exact Horizon revision a\",\n  \"file\": \"m.toml\"\n}";
+        let err = "{\n  \"code\": \"E_REVISION\",\n  \"message\": \"requires exact Offrizon revision a\",\n  \"file\": \"m.toml\"\n}";
         assert_eq!(
             diagnostic(err).as_deref(),
-            Some("E_REVISION: requires exact Horizon revision a (m.toml)")
+            Some("E_REVISION: requires exact Offrizon revision a (m.toml)")
         );
     }
 
     #[test]
     fn a_tool_error_starts_with_the_mod_that_does_not_apply() {
-        // horizon-mixins e8cd0aa on Horizon 998b1d8 with fast_items 0.1.0 and appleskin 1.0.0
+        // horizon-mixins e8cd0aa on Offrizon 998b1d8 with fast_items 0.1.0 and appleskin 1.0.0
         // (made for ba6344a), as a player's build was on 2026-11-04.
         let err = r#"{
   "code": "E_TARGET_NOT_FOUND",

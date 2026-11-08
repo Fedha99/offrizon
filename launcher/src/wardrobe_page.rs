@@ -134,7 +134,7 @@ fn plain() -> Texture {
     }
 }
 
-/// Horizon's stand-in player, the website shop's own (`standInSkin` in horizon-site's
+/// Offrizon's stand-in player, the website shop's own (`standInSkin` in horizon-site's
 /// `components/shop/model.ts`): original art painted from rows, not Mojang's. The Shop dresses it
 /// when the account has no skin the preview can read, so its pictures match the website's.
 fn stand_in() -> Texture {
@@ -351,7 +351,7 @@ fn tell_the_game(uuid: &str, saved: &Saved) {
     let home = backend::game_home();
     // Whether it owns a cosmetic: the game shows others' to an owner who chose nothing.
     if let Err(e) = prefs::set_owned(&home, uuid, !me.owned.is_empty()) {
-        eprintln!("Horizon: the cosmetics ownership is not saved: {e}");
+        eprintln!("Offrizon: the cosmetics ownership is not saved: {e}");
     }
     if saved
         .pending
@@ -361,7 +361,7 @@ fn tell_the_game(uuid: &str, saved: &Saved) {
         return;
     }
     if let Err(e) = prefs::set_confirmed(&home, uuid, me.visible) {
-        eprintln!("Horizon: the cosmetics confirmation is not saved: {e}");
+        eprintln!("Offrizon: the cosmetics confirmation is not saved: {e}");
     }
     let wish = Prefs::load(&home);
     if wish.mine != me.visible {
@@ -370,7 +370,7 @@ fn tell_the_game(uuid: &str, saved: &Saved) {
             ..wish
         };
         if let Err(e) = switches.save(&home) {
-            eprintln!("Horizon: the cosmetics switches are not saved: {e}");
+            eprintln!("Offrizon: the cosmetics switches are not saved: {e}");
         }
     }
 }
@@ -433,7 +433,7 @@ impl Launcher {
             };
             trip.result = refresh(&service, &account, &mut trip);
             if let Err(e) = trip.saved.save(&dir(), &account.uuid) {
-                eprintln!("Horizon: the outfit is not saved: {e}");
+                eprintln!("Offrizon: the outfit is not saved: {e}");
             }
             trip
         });
@@ -582,12 +582,12 @@ impl Launcher {
                 ..Prefs::load(&home)
             };
             if let Err(e) = switches.save(&home) {
-                eprintln!("Horizon: the cosmetics switches are not saved: {e}");
+                eprintln!("Offrizon: the cosmetics switches are not saved: {e}");
             }
         }
         w.saved.change(change);
         if let Err(e) = w.saved.save(&dir(), &w.uuid) {
-            eprintln!("Horizon: the outfit is not saved: {e}");
+            eprintln!("Offrizon: the outfit is not saved: {e}");
         }
         self.restyle = true;
         let Some(w) = self.wardrobe.as_mut() else {
@@ -609,7 +609,7 @@ impl Launcher {
         let task = cx.background_executor().spawn(async move {
             let result = Service::live().sync(&session, &mut saved);
             if let Err(e) = saved.save(&dir(), &uuid) {
-                eprintln!("Horizon: the outfit is not saved: {e}");
+                eprintln!("Offrizon: the outfit is not saved: {e}");
             }
             Trip {
                 saved,
@@ -650,7 +650,7 @@ impl Launcher {
                 }
             }
             if let Err(e) = saved.save(&dir(), &uuid) {
-                eprintln!("Horizon: the outfit is not saved: {e}");
+                eprintln!("Offrizon: the outfit is not saved: {e}");
             }
             let said = match &result {
                 Ok(()) => tr("The Founder Set is yours.").to_string(),
@@ -914,7 +914,7 @@ impl Launcher {
             .is_some_and(|me| me.owned.is_empty());
         let header = page_header(
             "Wardrobe",
-            "What you wear in every Horizon world and server. Changes reach other players the next \
+            "What you wear in every Offrizon world and server. Changes reach other players the next \
              time they see you.",
             &t,
         );
@@ -1041,8 +1041,8 @@ impl Launcher {
                 .get_or_bake(id, hash, scale, || Self::wardrobe_mark(i, scale))
                 .clone()
         });
-        // As the game draws it: Horizon's mark before the name (unless the game's "Show me as a
-        // Horizon player" is off), the style's badge after it.
+        // As the game draws it: Offrizon's mark before the name (unless the game's "Show me as a
+        // Offrizon player" is off), the style's badge after it.
         let horizon = prefs::listed(&backend::game_home()).then(|| {
             let scale = self.scale;
             self.wardrobe_marks
@@ -1425,7 +1425,7 @@ impl Launcher {
             let home = home.clone();
             move |_: &ClickEvent, _: &mut Window, cx: &mut App| {
                 if let Err(e) = prefs.save(&home) {
-                    eprintln!("Horizon: the cosmetics switches are not saved: {e}");
+                    eprintln!("Offrizon: the cosmetics switches are not saved: {e}");
                 }
                 cx.refresh_windows();
             }
@@ -1453,7 +1453,7 @@ impl Launcher {
                     "wardrobe-others",
                     hidden,
                     "Hide other players' cosmetics",
-                    "Others look like plain players to you. Also in the game's Horizon settings.",
+                    "Others look like plain players to you. Also in the game's Offrizon settings.",
                 )
                 .on_click(save(Prefs {
                     others: Some(if hidden {
@@ -1469,7 +1469,7 @@ impl Launcher {
                     "wardrobe-hide-fx",
                     prefs.hide_fx,
                     "Hide other players' trails and auras",
-                    "Off by default. Also in the game's Horizon settings.",
+                    "Off by default. Also in the game's Offrizon settings.",
                 )
                 .on_click(save(Prefs {
                     hide_fx: !prefs.hide_fx,

@@ -24,7 +24,7 @@ mod tests {
             assert!(package_managed(Path::new(path)), "{path}");
         }
         for path in [
-            "/home/player/Downloads/Horizon.AppImage",
+            "/home/player/Downloads/Offrizon.AppImage",
             "/usr/local/bin/horizon-launcher",
             "/usr-backup/horizon-launcher",
             "/nix/storehouse/horizon-launcher",

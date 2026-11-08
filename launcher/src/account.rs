@@ -10,7 +10,7 @@
 //! Minecraft: Java Edition, as other launchers do. Offline names play behind such an account.
 //! The game binary itself, its harnesses and the servers don't go through the launcher's gate.
 //!
-//! The Azure app (client ID) is Horizon's own and is configuration: `HORIZON_MSA_CLIENT_ID` at
+//! The Azure app (client ID) is Offrizon's own and is configuration: `HORIZON_MSA_CLIENT_ID` at
 //! build time, or at run time to override it. Without one, sign-in says it is not configured.
 pub mod session;
 
@@ -1015,7 +1015,7 @@ impl SecretStore for SystemStore {
             let attributes = vec![("service", SERVICE), ("account", key)];
             keyring
                 .create_item(
-                    "Horizon launcher: Minecraft account",
+                    "Offrizon launcher: Minecraft account",
                     &attributes,
                     secret.as_bytes(),
                     true,
@@ -1215,7 +1215,7 @@ fn set_item(items: &dyn Items, key: &str, secret: &str) -> Result<(), String> {
 /// the player's credential store is full (an undocumented limit of its total size). The Xbox app
 /// and the Minecraft Launcher are known to leave hundreds of items there (#4313, #4366).
 #[cfg(any(target_os = "windows", test))]
-pub const CREDENTIAL_MANAGER_FULL: &str = "Windows Credential Manager is full, so Horizon can't \
+pub const CREDENTIAL_MANAGER_FULL: &str = "Windows Credential Manager is full, so Offrizon can't \
      keep your sign-in (Windows error 8; it isn't your computer's memory). Open Credential Manager \
      from the Start menu, go to Windows Credentials and remove entries you no longer use, then sign \
      in again. The Xbox app and the Minecraft Launcher often leave many XblGrts and Xbl| entries \
@@ -1698,10 +1698,10 @@ impl Accounts {
         }
     }
 
-    /// Plays as `who`: an account, an offline name (kept, only beside an account that owns the
-    /// game), or the game's own name.
+    /// Plays as `who`: an account, an offline name, or the game's own name. Offrizon: offline
+    /// names play without an account that owns the game, so this always passes them.
     pub fn play_as(&mut self, store: &dyn SecretStore, who: Player) -> Result<(), String> {
-        self.play_as_with(store, who, false)
+        self.play_as_with(store, who, true)
     }
 
     /// [`Self::play_as`], where `offline_without_owner` (the window's hidden developer option,
@@ -2207,7 +2207,7 @@ pub fn session_for_game(
         pass.session.as_ref().map(|(a, _)| a.uuid.as_str()),
     );
     if let Err(e) = accounts.save() {
-        eprintln!("Horizon: the accounts are not saved: {e}");
+        eprintln!("Offrizon: the accounts are not saved: {e}");
     }
     Ok(session_file(game_home, pass, env))
 }
@@ -2226,7 +2226,7 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
         who,
     );
     if let Err(e) = accounts.save() {
-        eprintln!("Horizon: the accounts are not saved: {e}");
+        eprintln!("Offrizon: the accounts are not saved: {e}");
     }
     let pass = pass?;
     let env = split_sessions(
@@ -2235,7 +2235,7 @@ pub fn session_for_game_as(game_home: &Path, who: &Player) -> Result<GameSession
         pass.session.as_ref().map(|(a, _)| a.uuid.as_str()),
     );
     if let Err(e) = accounts.save() {
-        eprintln!("Horizon: the accounts are not saved: {e}");
+        eprintln!("Offrizon: the accounts are not saved: {e}");
     }
     Ok(session_file(game_home, pass, env))
 }
@@ -2253,9 +2253,9 @@ fn launch_as(
         accounts.offline_selected.clone(),
         accounts.offline.clone(),
     );
-    let pass = accounts
-        .play_as(store, who.clone())
-        .and_then(|()| launch(ep, client_id, store, accounts).map_err(|e| e.to_string()));
+    let pass = accounts.play_as(store, who.clone()).and_then(|()| {
+        launch_for_game(ep, client_id, store, accounts, true).map_err(|e| e.to_string())
+    });
     (
         accounts.selected,
         accounts.offline_selected,
@@ -2434,7 +2434,7 @@ pub fn java_player() -> Result<crate::java_launch::Player, String> {
         &mut accounts,
     );
     if let Err(e) = accounts.save() {
-        eprintln!("Horizon: the accounts are not saved: {e}");
+        eprintln!("Offrizon: the accounts are not saved: {e}");
     }
     player
 }

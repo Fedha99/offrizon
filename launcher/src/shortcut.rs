@@ -1,13 +1,13 @@
 //! A shortcut on the desktop that plays one instance: it runs
 //! `horizon-launcher play --instance <id>`, so the game starts without the launcher's window.
 //!
-//! - Linux: `<name> (Horizon).desktop` on the desktop (executable, and marked trusted with `gio`
+//! - Linux: `<name> (Offrizon).desktop` on the desktop (executable, and marked trusted with `gio`
 //!   where it exists, so GNOME starts it), and the same entry in the applications menu
 //!   (`applications/horizon-instance-<id>.desktop`, `desktop::data_home`).
-//! - macOS: `<name> (Horizon).app`, a small app whose program is a shell script, with Horizon's
+//! - macOS: `<name> (Offrizon).app`, a small app whose program is a shell script, with Offrizon's
 //!   icon. It has no Dock icon of its own (`LSUIElement`): the game's window is the one to see.
-//! - Windows: `<name> (Horizon).lnk`, a Shell Link as Microsoft's published [MS-SHLLINK] format
-//!   lays it out, to the launcher's `.exe` with Horizon's icon.
+//! - Windows: `<name> (Offrizon).lnk`, a Shell Link as Microsoft's published [MS-SHLLINK] format
+//!   lays it out, to the launcher's `.exe` with Offrizon's icon.
 //!
 //! Each shortcut names its instance's id inside it, so removing finds it after a rename.
 //! `HORIZON_LAUNCHER_DESKTOP` points the desktop folder elsewhere, for tests.
@@ -21,7 +21,7 @@ use std::path::{Path, PathBuf};
 pub const DESKTOP_ENV: &str = "HORIZON_LAUNCHER_DESKTOP";
 const MAC_ICON: &[u8] = include_bytes!("../../packaging/icons/horizon.icns");
 /// The key a Linux shortcut names its instance with.
-const INSTANCE_KEY: &str = "X-Horizon-Instance";
+const INSTANCE_KEY: &str = "X-Offrizon-Instance";
 /// And a macOS one, in its Info.plist.
 const MAC_KEY: &str = "<key>HorizonInstance</key>";
 
@@ -74,7 +74,7 @@ pub fn file_name(name: &str, system: System) -> String {
         .collect();
     let clean = clean.trim().trim_matches('.');
     let clean = if clean.is_empty() { "Instance" } else { clean };
-    format!("{clean} (Horizon).{}", system.extension())
+    format!("{clean} (Offrizon).{}", system.extension())
 }
 
 /// The id as a file name or bundle id part: letters, digits and `-`.
@@ -91,7 +91,7 @@ pub fn desktop_entry(exe: &Path, id: &str, name: &str) -> String {
         "[Desktop Entry]\n\
          Type=Application\n\
          Name={name}\n\
-         Comment=Play {name} in Horizon\n\
+         Comment=Play {name} in Offrizon\n\
          Exec={} play --instance {}\n\
          TryExec={}\n\
          Icon=horizon\n\
@@ -148,7 +148,7 @@ pub fn mac_app(exe: &Path, id: &str, name: &str) -> Vec<(&'static str, Vec<u8>, 
         xml(id),
     );
     let script = format!(
-        "#!/bin/sh\n# Plays the Horizon instance {}.\nexec {} play --instance {}\n",
+        "#!/bin/sh\n# Plays the Offrizon instance {}.\nexec {} play --instance {}\n",
         name.replace('\n', " "),
         sh_quote(&exe.to_string_lossy()),
         sh_quote(id),
@@ -370,7 +370,7 @@ pub fn make_in(
         }
         System::Windows => {
             let args = windows_args(id);
-            let comment = format!("Play {name} in Horizon");
+            let comment = format!("Play {name} in Offrizon");
             // On Windows the shell writes the shortcut (`write_windows_link`); elsewhere, and in
             // tests for the other systems, it is laid out from the format.
             #[cfg(windows)]

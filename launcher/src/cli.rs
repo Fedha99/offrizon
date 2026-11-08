@@ -20,7 +20,7 @@ use std::process::Command;
 #[command(
     name = "horizon-launcher",
     version = backend::VERSION,
-    about = "Installs, prepares and starts Horizon. Without a subcommand, opens the window."
+    about = "Installs, prepares and starts Offrizon. Without a subcommand, opens the window."
 )]
 struct Cli {
     /// Print JSON instead of text, where a command has something to report
@@ -32,7 +32,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum JavaCmd {
-    /// The Java runtimes Horizon downloaded from Mojang and the ones installed on this computer
+    /// The Java runtimes Offrizon downloaded from Mojang and the ones installed on this computer
     List,
     /// Download Mojang's Java runtime: a major (8, 16, 17, 21, 25) or a component name from a
     /// version's JSON (java-runtime-delta)
@@ -232,7 +232,7 @@ enum InstanceCmd {
         #[arg(long)]
         copy: Option<String>,
         /// Make a Minecraft: Java Edition instance of this version (1.21.4, latest or
-        /// latest-snapshot) instead of a Horizon one
+        /// latest-snapshot) instead of a Offrizon one
         #[arg(long, conflicts_with = "copy")]
         minecraft: Option<String>,
         /// With this mod loader: fabric, quilt, forge or neoforge
@@ -284,7 +284,7 @@ enum InstanceCmd {
     /// Rename an instance (its folder stays)
     Rename { instance: String, name: String },
     /// Delete an instance: its folder (worlds, options, packs) goes to the Trash, where you can
-    /// get it back. Horizon's own instance stays
+    /// get it back. Offrizon's own instance stays
     Delete { instance: String },
     /// Set an instance's icon: a block or item name from your prepared files (grass_block),
     /// a colour (#3fa7d6), or none
@@ -296,9 +296,9 @@ enum InstanceCmd {
     },
     /// Make Play start this instance
     Select { instance: String },
-    /// Keep an instance on one installed Horizon version, or "latest" to follow updates again
+    /// Keep an instance on one installed Offrizon version, or "latest" to follow updates again
     Version { instance: String, version: String },
-    /// Export an instance (or a port) to share: its settings, packs, Horizon mods and the worlds
+    /// Export an instance (or a port) to share: its settings, packs, Offrizon mods and the worlds
     /// named, as a .mrpack (resource packs from Modrinth listed by download) or a zip. Never
     /// logs, screenshots or account data; worlds go without their per-player files
     Export {
@@ -358,7 +358,7 @@ enum InstanceCmd {
         #[arg(long)]
         instance: Option<String>,
         /// A .mrpack becomes a Minecraft: Java Edition instance with its Minecraft version, mod
-        /// loader, mods and overrides, instead of a Horizon instance or a Modpacks import
+        /// loader, mods and overrides, instead of a Offrizon instance or a Modpacks import
         #[arg(long)]
         java: bool,
     },
@@ -555,7 +555,7 @@ enum ModsCmd {
         #[arg(long)]
         instance: Option<String>,
     },
-    /// Search for packs Horizon loads, or for what a Java instance runs (made for its
+    /// Search for packs Offrizon loads, or for what a Java instance runs (made for its
     /// Minecraft version and loader)
     Search {
         text: Vec<String>,
@@ -570,7 +570,7 @@ enum ModsCmd {
         #[arg(long)]
         instance: Option<String>,
     },
-    /// Say how well a Java mod runs in Horizon: its jar is downloaded (checksum checked),
+    /// Say how well a Java mod runs in Offrizon: its jar is downloaded (checksum checked),
     /// carried over and read; the answer is kept
     Check {
         project: String,
@@ -611,7 +611,7 @@ enum ModsCmd {
     /// Install a native mod from a GitHub link (docs/native-mods.md, "Install from GitHub"):
     /// https://github.com/OWNER/REPO (its latest release, else its default branch),
     /// .../releases/tag/TAG, .../tree/REF or .../commit/SHA. Resolved to an exact release file or
-    /// commit, checked like a registry mod. NOT reviewed by the Horizon registry
+    /// commit, checked like a registry mod. NOT reviewed by the Offrizon registry
     AddGithub {
         url: String,
         /// The mod to install when the link holds several
@@ -672,7 +672,7 @@ enum KindArg {
     Mod,
     Resource,
     Modpack,
-    /// Horizon's own shader packs (Horizon's registry only)
+    /// Offrizon's own shader packs (Offrizon's registry only)
     Shader,
     /// Data packs (Modrinth): install one into a world with `mods install <pack> --world <name>`
     Datapack,
@@ -683,8 +683,8 @@ enum SourceArg {
     Modrinth,
     /// CurseForge support is coming soon
     Curseforge,
-    /// Horizon's own registry: mods, modpacks and resource packs made for Horizon, reviewed
-    Horizon,
+    /// Offrizon's own registry: mods, modpacks and resource packs made for Offrizon, reviewed
+    Offrizon,
 }
 
 impl SourceArg {
@@ -693,7 +693,7 @@ impl SourceArg {
         let id = match self {
             SourceArg::Modrinth => SourceId::Modrinth,
             SourceArg::Curseforge => SourceId::CurseForge,
-            SourceArg::Horizon => SourceId::Horizon,
+            SourceArg::Offrizon => SourceId::Offrizon,
         };
         browser::source(id).ok_or_else(|| browser::CURSEFORGE_SOON.into())
     }
@@ -703,7 +703,7 @@ impl SourceArg {
 enum Cmd {
     /// Write a shell completion script to stdout
     Completions { shell: clap_complete::Shell },
-    /// List Horizon releases, or the installed versions
+    /// List Offrizon releases, or the installed versions
     Versions {
         /// Only the versions installed here (no network)
         #[arg(long)]
@@ -788,7 +788,7 @@ enum Cmd {
         #[arg(long)]
         clear: bool,
     },
-    /// Native mods (docs/native-mods.md): compile mixin bundles on the Horizon revision they
+    /// Native mods (docs/native-mods.md): compile mixin bundles on the Offrizon revision they
     /// pin, else the one the instance plays, with the launcher's own Rust, as the version the
     /// instance then plays. Not sandboxed: the mods' code runs with your rights
     NativeBuild {
@@ -811,21 +811,21 @@ enum Cmd {
         instance: Option<String>,
         /// The installed version whose game files the build reuses, and whose commit it builds on
         /// when no mod pins one (default: the one the instance plays, so a rebuild stays on its
-        /// Horizon)
+        /// Offrizon)
         #[arg(long)]
         version: Option<String>,
-        /// Move to the newest installed release or Nightly instead of the Horizon the instance
+        /// Move to the newest installed release or Nightly instead of the Offrizon the instance
         /// plays (a full rebuild)
         #[arg(long, conflicts_with = "version")]
         update: bool,
         /// You read the mods' source and trust it with full access to this computer
         #[arg(long)]
         trust_native_code: bool,
-        /// Build mods made for different Horizon versions together anyway, on the newest of them
+        /// Build mods made for different Offrizon versions together anyway, on the newest of them
         #[arg(long)]
         allow_version_mismatch: bool,
         /// Build every mod on the commit of the version the build starts from, even the mods that
-        /// pin another Horizon commit (they may not apply or compile there)
+        /// pin another Offrizon commit (they may not apply or compile there)
         #[arg(long)]
         ignore_pins: bool,
         /// The build profile: performance (the default: incremental, quick to rebuild), dev (quickest
@@ -853,7 +853,7 @@ enum Cmd {
     /// system|en|fr|ru|de|zh|es|uk|pl (the window's language; system follows the computer's), accent
     /// violet|blue|teal|green|amber|red|pink|#rrggbb|DEGREES (a named accent, any colour, or any
     /// hue), background PATH (a picture behind Home; "default"
-    /// shows Horizon's landscape), native-cache-gib N (combined native compilation cache limit
+    /// shows Offrizon's landscape), native-cache-gib N (combined native compilation cache limit
     /// in GiB, default 30; 0 disables automatic cleanup), native-profile performance|dev|release (the profile native
     /// mods build with: performance is incremental, dev rebuilds a mod quickest for a slow game,
     /// release is slowest to build and slightly faster to play)
@@ -891,13 +891,13 @@ enum Cmd {
         #[arg(long)]
         crash: bool,
     },
-    /// Look for a newer Horizon release and launcher, and install them
+    /// Look for a newer Offrizon release and launcher, and install them
     Update {
         /// Only report what is available
         #[arg(long)]
         check: bool,
     },
-    /// Linux: put Horizon in the applications menu (an entry and the icon, under
+    /// Linux: put Offrizon in the applications menu (an entry and the icon, under
     /// $XDG_DATA_HOME), or take it out with --remove
     DesktopEntry {
         /// Remove the entry and the icon, and stop adding them back
@@ -1422,7 +1422,7 @@ fn execute(command: Cmd, as_json: bool) -> Result<(), String> {
             trust_unsigned,
         } => {
             if !trust_unsigned {
-                return Err("An imported build is unsigned: Horizon can't check where it came from. If you trust it, pass --trust-unsigned.".into());
+                return Err("An imported build is unsigned: Offrizon can't check where it came from. If you trust it, pass --trust-unsigned.".into());
             }
             let tag = build_import::import(&path, version.as_deref())?;
             let prepared = backend::check_prepared(&tag);
@@ -1480,7 +1480,7 @@ fn execute(command: Cmd, as_json: bool) -> Result<(), String> {
                 {
                     return Err(format!(
                         "{} plays Minecraft: Java Edition: --version, --world, --creative, \
-                         --join and --account are for Horizon instances.",
+                         --join and --account are for Offrizon instances.",
                         instance.name
                     ));
                 }
@@ -1743,10 +1743,10 @@ fn execute(command: Cmd, as_json: bool) -> Result<(), String> {
             settings.save()?;
             if remove {
                 horizon_launcher::desktop::remove()?;
-                println!("Removed Horizon from the applications menu.");
+                println!("Removed Offrizon from the applications menu.");
             } else {
                 horizon_launcher::desktop::install(backend::exe_path())?;
-                println!("Horizon is in the applications menu.");
+                println!("Offrizon is in the applications menu.");
             }
         }
         Cmd::Worlds { action } => worlds(
@@ -1788,11 +1788,11 @@ fn java(action: JavaCmd, as_json: bool) -> Result<(), String> {
             if as_json {
                 json(serde_json::json!(all));
             } else if all.is_empty() {
-                println!("No Java yet. Horizon downloads Mojang's when an instance needs it.");
+                println!("No Java yet. Offrizon downloads Mojang's when an instance needs it.");
             } else {
                 for r in &all {
                     let from = match r.source {
-                        java::Source::Mojang => "Mojang's, downloaded by Horizon",
+                        java::Source::Mojang => "Mojang's, downloaded by Offrizon",
                         java::Source::Installed => "installed",
                     };
                     println!("Java {}  ({from})\n  {}", r.version, r.home.display());
@@ -1875,12 +1875,12 @@ fn update(check: bool, as_json: bool) -> Result<(), String> {
         return Ok(());
     }
     match &updates.horizon {
-        None => println!("Horizon: up to date."),
-        Some(r) if check => println!("Horizon: {} is available.", r.tag),
+        None => println!("Offrizon: up to date."),
+        Some(r) if check => println!("Offrizon: {} is available.", r.tag),
         Some(r) => {
             let tag =
                 backend::install_tag(&r.tag, true, progress(format!("Installing {}", r.tag)))?;
-            println!("Horizon: installed {tag}.");
+            println!("Offrizon: installed {tag}.");
         }
     }
     match &updates.launcher {
@@ -2278,7 +2278,7 @@ fn servers(action: ServersCmd, as_json: bool) -> Result<(), String> {
             let tag = backend::resolve_version(version.as_deref())?;
             servers::set_up(&tag)?;
             println!(
-                "Servers run Horizon {}",
+                "Servers run Offrizon {}",
                 servers::runtime_release().unwrap_or(tag)
             );
         }
@@ -2316,7 +2316,7 @@ fn github_native(
     trust: bool,
 ) -> Result<(), String> {
     if java {
-        return Err("Native mods from GitHub are for Horizon instances.".into());
+        return Err("Native mods from GitHub are for Offrizon instances.".into());
     }
     println!("{}", found.label());
     println!("Source, to read: {}", found.source_url());
@@ -2394,7 +2394,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
     let from_registry = installed::Installed::load(&home)
         .entries
         .iter()
-        .any(|e| e.source == SourceId::Horizon);
+        .any(|e| e.source == SourceId::Offrizon);
     if from_registry {
         if let Ok(index) = horizon::index() {
             for said in horizon::turn_off_revoked(&index, &home) {
@@ -2483,7 +2483,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
                         "id": p.id, "slug": p.slug, "title": p.title, "summary": p.summary,
                         "author": p.author, "downloads": p.downloads, "page": p.page,
                         "license": p.license, "support": support.label(), "reason": support.reason(),
-                        "about": if p.source == SourceId::Horizon { horizon::trust_and_capabilities(&p.id, instance.as_ref()) } else { Vec::new() },
+                        "about": if p.source == SourceId::Offrizon { horizon::trust_and_capabilities(&p.id, instance.as_ref()) } else { Vec::new() },
                     })
                 }).collect());
             } else {
@@ -2492,7 +2492,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
                 }
                 for p in &found {
                     let support = p.support();
-                    if p.source == SourceId::Horizon {
+                    if p.source == SourceId::Offrizon {
                         println!("{}  ({})  {}\n  {}", p.title, p.slug, p.author, p.summary);
                         for line in horizon::trust_and_capabilities(&p.id, instance.as_ref()) {
                             println!("  {line}");
@@ -2604,7 +2604,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
                     p.title
                 ));
             }
-            if p.kind == Kind::Modpack && p.source == SourceId::Horizon {
+            if p.kind == Kind::Modpack && p.source == SourceId::Offrizon {
                 let pack = horizon::pack::install(&p.id, &line)?;
                 if as_json {
                     json(
@@ -2727,7 +2727,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
             ..
         } => {
             if java.is_some() {
-                return Err("Native mods from GitHub are for Horizon instances.".into());
+                return Err("Native mods from GitHub are for Offrizon instances.".into());
             }
             let mut origins = github_mods::origins(&home);
             origins.retain(|o| id.as_deref().is_none_or(|i| o.id == i));
@@ -2786,7 +2786,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
             if on {
                 if let Some(r) = horizon::index()
                     .ok()
-                    .filter(|_| e.source == SourceId::Horizon)
+                    .filter(|_| e.source == SourceId::Offrizon)
                     .and_then(|i| {
                         i.revoked(&e.project, e.checksum.trim_start_matches("SHA-256:"))
                             .cloned()
@@ -2957,7 +2957,7 @@ fn instance(action: InstanceCmd, as_json: bool) -> Result<(), String> {
         } => {
             let Some(java) = instances::find(&instance)?.java else {
                 return Err(format!(
-                    "{instance} is a Horizon instance: mod loaders are for Java instances."
+                    "{instance} is a Offrizon instance: mod loaders are for Java instances."
                 ));
             };
             if list {
@@ -3003,7 +3003,7 @@ fn instance(action: InstanceCmd, as_json: bool) -> Result<(), String> {
             let window = window.as_deref().map(parse_window).transpose()?;
             if instances::find(&instance)?.java.is_none() {
                 return Err(format!(
-                    "{instance} is a Horizon instance: Horizon is not a Java program."
+                    "{instance} is a Offrizon instance: Offrizon is not a Java program."
                 ));
             }
             changed(instances::edit(&instance, |m| {
@@ -3681,7 +3681,7 @@ fn modpack(action: ModpackCmd, as_json: bool) -> Result<(), String> {
                     );
                 } else {
                     println!(
-                        "{} {}  ({}, from Horizon's registry)\n  {}",
+                        "{} {}  ({}, from Offrizon's registry)\n  {}",
                         p.name,
                         p.version,
                         p.id,

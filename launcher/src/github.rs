@@ -7,7 +7,7 @@
 //!   list, spend one call. After that the read is a conditional request with the saved ETag. An
 //!   anonymous 304 still counts against the hour (measured 2026-11-01), so that only saves the
 //!   download; with `HORIZON_GITHUB_TOKEN` (CI) a 304 is free;
-//! - when GitHub answers with its rate limit (or not at all), Horizon's own repository is read
+//! - when GitHub answers with its rate limit (or not at all), Offrizon's own repository is read
 //!   through Kira's public mirror ([`MIRROR`], kira's `src/launcher-github.js`), which caches
 //!   GitHub's answers for everyone;
 //! - when both fail, the last answer kept on disk is used, else the error says what happened.
@@ -20,7 +20,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 const API: &str = "https://api.github.com";
-/// Kira's read-only mirror of Horizon's release reads. `HORIZON_GITHUB_MIRROR` replaces it (an
+/// Kira's read-only mirror of Offrizon's release reads. `HORIZON_GITHUB_MIRROR` replaces it (an
 /// empty value turns it off).
 pub const MIRROR: &str = "https://mcp.playhorizon.dev/github/public";
 
@@ -105,7 +105,7 @@ pub(crate) fn json_with(
     }
     Err(match from_mirror {
         Some(m) => format!(
-            "{why}, and Horizon's mirror of GitHub couldn't help either ({m}). Try again in a few minutes."
+            "{why}, and Offrizon's mirror of GitHub couldn't help either ({m}). Try again in a few minutes."
         ),
         None => why,
     })
@@ -113,7 +113,7 @@ pub(crate) fn json_with(
 
 const RATE_LIMITED: &str = "GitHub's rate limit was reached for your network";
 
-/// The mirror's URL for an API URL it serves (Horizon's own repository), or None.
+/// The mirror's URL for an API URL it serves (Offrizon's own repository), or None.
 pub(crate) fn mirror_url(url: &str) -> Option<String> {
     mirror_url_with(url, &mirror_base())
 }

@@ -5,7 +5,7 @@
 //!
 //! Not in the mockup, kept in its patterns: the appearance, the Home background, the data and
 //! logs folders and the applications menu (About's rows), the AI clients, data collection (its own
-//! entry in the list) and the hidden developer options. The mockup's About tiles for Horizon and
+//! entry in the list) and the hidden developer options. The mockup's About tiles for Offrizon and
 //! the launcher open Updates here, beside the switches that decide how updates install. The mockup's Native mods switch is the
 //! native mods' build profile here: they are always on.
 
@@ -249,7 +249,7 @@ impl Launcher {
             Some(
                 div()
                     .child(tr(
-                        "At start and before you play, what you installed from Horizon's registry moves to its newest version for this game. Never inside a modpack, and an update that would remove blocks or items waits for you.",
+                        "At start and before you play, what you installed from Offrizon's registry moves to its newest version for this game. Never inside a modpack, and an update that would remove blocks or items waits for you.",
                     ))
                     .into_any_element(),
             ),
@@ -315,7 +315,7 @@ impl Launcher {
         )
     }
 
-    /// Updates' two tiles (the mockup's `AboutTile`s): Horizon and its update, the launcher and its
+    /// Updates' two tiles (the mockup's `AboutTile`s): Offrizon and its update, the launcher and its
     /// own.
     fn update_tiles(
         &mut self,
@@ -374,7 +374,7 @@ impl Launcher {
             .gap(px(8.))
             .child(tile(
                 self.horizon_mark(42.),
-                "Horizon".into(),
+                "Offrizon".into(),
                 installed.unwrap_or_else(|| tr("Nightly").to_string()),
                 div()
                     .flex()
@@ -497,7 +497,7 @@ impl Launcher {
                     0,
                     tr("Applications menu"),
                     note(if self.settings.desktop_entry() {
-                        "Horizon and its icon are in your desktop's menu."
+                        "Offrizon and its icon are in your desktop's menu."
                     } else {
                         "Not in your desktop's menu."
                     }),

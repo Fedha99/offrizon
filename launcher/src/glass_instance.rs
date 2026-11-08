@@ -249,7 +249,7 @@ impl Launcher {
         self.instances.dialog.as_ref()?.java.minecraft(versions)
     }
 
-    /// The Horizon version an instance plays: the one it keeps, else the one it follows.
+    /// The Offrizon version an instance plays: the one it keeps, else the one it follows.
     pub(super) fn draft_horizon(&self) -> Option<String> {
         let pin = self.instances.dialog.as_ref()?.pin.clone();
         pin.or_else(|| self.followed_version())
@@ -263,7 +263,7 @@ impl Launcher {
             .or_else(|| self.horizon_choices().into_iter().next())
     }
 
-    /// The Horizon versions the dialog offers (the mockup's `data.nightlies`): see
+    /// The Offrizon versions the dialog offers (the mockup's `data.nightlies`): see
     /// [`horizon_choices`].
     pub(super) fn horizon_choices(&self) -> Vec<String> {
         let releases = match &self.releases {
@@ -273,7 +273,7 @@ impl Launcher {
         horizon_choices(releases, &self.installed)
     }
 
-    /// The release to download for the Horizon version `tag`, when it isn't installed.
+    /// The release to download for the Offrizon version `tag`, when it isn't installed.
     pub(super) fn release_to_install(&self, tag: &str) -> Option<Release> {
         let Load::Ready(releases) = &self.releases else {
             return None;
@@ -284,11 +284,11 @@ impl Launcher {
             .cloned()
     }
 
-    /// The mark an instance shows when nothing is chosen: Horizon's, the grass block, its
+    /// The mark an instance shows when nothing is chosen: Offrizon's, the grass block, its
     /// loader's logo.
     fn auto_mark(&mut self, kind: NewKind, loader: Loader, size: f32) -> AnyElement {
         let mark = match kind {
-            NewKind::Horizon => return self.horizon_mark(size),
+            NewKind::Offrizon => return self.horizon_mark(size),
             NewKind::Vanilla => self.grass_mark(size),
             NewKind::Modded => self.loader_logo(loader.id(), size),
         };
@@ -383,9 +383,9 @@ impl Launcher {
             )],
         );
         let mut summary = match kind {
-            NewKind::Horizon => match self.draft_horizon() {
-                Some(tag) => format!("Horizon · {}", version_label(&tag)),
-                None => "Horizon".into(),
+            NewKind::Offrizon => match self.draft_horizon() {
+                Some(tag) => format!("Offrizon · {}", version_label(&tag)),
+                None => "Offrizon".into(),
             },
             NewKind::Vanilla => format!("{} · {minecraft}", tr("Vanilla")),
             NewKind::Modded => format!("{} · {minecraft}", loader.name()),
@@ -396,7 +396,7 @@ impl Launcher {
         }
         let icon = self.draft_icon(editing, kind, &name, 88.);
         let note = match kind {
-            NewKind::Horizon => {
+            NewKind::Offrizon => {
                 tr("Its own worlds and packs. Your options and player name come along.")
             }
             _ => tr("Play downloads the game from Mojang the first time, with the Java it needs."),
@@ -404,7 +404,7 @@ impl Launcher {
         // One made in the launcher can switch what it plays; the game's home and modpacks
         // play what they were made with.
         let switches = editing.is_none_or(|i| i.kind == instances::Kind::Own);
-        let kinds = [NewKind::Horizon, NewKind::Vanilla, NewKind::Modded];
+        let kinds = [NewKind::Offrizon, NewKind::Vanilla, NewKind::Modded];
         let names: Vec<&str> = loaders().iter().map(|l| l.name()).collect();
         let modded = match names.split_last() {
             Some((last, [])) => last.to_string(),
@@ -417,10 +417,10 @@ impl Launcher {
         let mut cards = Vec::new();
         for k in kinds {
             let (id, title, note) = match k {
-                NewKind::Horizon => (
+                NewKind::Offrizon => (
                     "horizon",
-                    tr("Horizon"),
-                    tr("Minecraft rebuilt in Rust, with Horizon mods").to_string(),
+                    tr("Offrizon"),
+                    tr("Minecraft rebuilt in Rust, with Offrizon mods").to_string(),
                 ),
                 NewKind::Vanilla => (
                     "vanilla",
@@ -588,7 +588,7 @@ impl Launcher {
         let (busy, copy, error) = (d.busy, d.copy, d.error.clone());
         let title = match (editing, kind) {
             (Some(i), _) => trf("Edit {name}", &[("name", &i.name)]),
-            (None, NewKind::Horizon) => tr("A new Horizon instance").into(),
+            (None, NewKind::Offrizon) => tr("A new Offrizon instance").into(),
             (None, NewKind::Vanilla) => tr("A new vanilla instance").into(),
             (None, NewKind::Modded) => tr("A new modded instance").into(),
         };
@@ -658,7 +658,7 @@ impl Launcher {
         if let Some(i) = editing {
             body = body.children(self.switch_notice(i));
         }
-        if kind == NewKind::Horizon {
+        if kind == NewKind::Offrizon {
             body = body.child(self.horizon_versions(cx));
             if editing.is_none() {
                 body = body.child(self.start_from(copy, cx));
@@ -802,7 +802,7 @@ impl Launcher {
             .child(buttons.flex_none())
     }
 
-    /// Horizon's versions, the newest first: picking the one the launcher plays lets the
+    /// Offrizon's versions, the newest first: picking the one the launcher plays lets the
     /// instance follow it; any other is kept, and installed on Create when it isn't yet.
     fn horizon_versions(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
@@ -860,7 +860,7 @@ impl Launcher {
         let selected = self.selected_instance().cloned();
         let from = selected
             .as_ref()
-            .map_or_else(|| "Horizon".into(), |i| i.name.clone());
+            .map_or_else(|| "Offrizon".into(), |i| i.name.clone());
         let icon = match &selected {
             Some(i) => self.glass_instance_icon(i, 36.),
             None => self.horizon_mark(36.),

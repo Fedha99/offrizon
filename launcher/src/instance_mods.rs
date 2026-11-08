@@ -1,7 +1,7 @@
 //! Home's Mods tab (docs/design-system.md, "Night"; plan R0, screens 5 and 6): every mod of the
 //! selected instance, the browser's and those put in its folder by hand, with its version, where
 //! it comes from, an update when the browser found one, and a switch. A Java instance turns a mod
-//! off by renaming its jar (`.disabled`, as `java_instance` does); a Horizon instance's mods are
+//! off by renaming its jar (`.disabled`, as `java_instance` does); a Offrizon instance's mods are
 //! the registry's, switched as the game's Options > Mods does. Adding mods is the Mods page's.
 //!
 //! Each row shows the mod's own icon: Modrinth's for what the browser installed from it (the URLs
@@ -94,7 +94,7 @@ impl InstanceMods {
     }
 }
 
-/// The mods of the instance at `home`: a Java one's jars in `mods/` (on or off), a Horizon one's
+/// The mods of the instance at `home`: a Java one's jars in `mods/` (on or off), a Offrizon one's
 /// registry mods. Each jar names itself (`fabric.mod.json`, `quilt.mod.json`...), else its file.
 fn read(home: &Path, java_instance: bool) -> Vec<ModRow> {
     let entries: Vec<installed::Entry> = installed::Installed::load(home)
@@ -182,7 +182,7 @@ impl Launcher {
         self.instance_mods.cull.reset();
     }
 
-    /// Whether the selected instance has mods to show: Horizon's always, a Java one with a loader.
+    /// Whether the selected instance has mods to show: Offrizon's always, a Java one with a loader.
     pub(super) fn has_mods_tab(&self) -> bool {
         self.selected_instance()
             .is_some_and(|i| i.java.as_ref().is_none_or(|j| j.loader.is_some()))
@@ -366,7 +366,7 @@ impl Launcher {
             .map(|j| j.loader.as_ref().map(|l| l.kind.name()));
         let title = match loader {
             Some(Some(loader)) => trf("{loader} mods", &[("loader", loader)]),
-            _ => tr("Horizon mods").to_string(),
+            _ => tr("Offrizon mods").to_string(),
         };
         let filter = self
             .servers

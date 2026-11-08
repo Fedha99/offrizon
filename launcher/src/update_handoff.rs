@@ -281,7 +281,7 @@ mod tests {
     fn staged() -> Staged {
         Staged {
             tag: "launcher@0.2.41".into(),
-            payload: PathBuf::from("/data/.launcher-update/1-ab/unpacked/Horizon.app"),
+            payload: PathBuf::from("/data/.launcher-update/1-ab/unpacked/Offrizon.app"),
             sha256: "abc".into(),
         }
     }

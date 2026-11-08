@@ -1,13 +1,13 @@
 //! Per-user setup on Windows, no administrator needed.
 //!
 //! `horizon-launcher-setup.exe` (the launcher's own binary under another name, made by the
-//! release workflow) copies itself to `%LOCALAPPDATA%\Programs\Horizon Launcher\horizon-launcher.exe`,
+//! release workflow) copies itself to `%LOCALAPPDATA%\Programs\Offrizon Launcher\horizon-launcher.exe`,
 //! makes the Start menu shortcut (and the desktop one if asked) and the Uninstall entry under HKCU,
 //! and starts the installed copy. `horizon-launcher.exe uninstall` takes it all away again: the
 //! launcher's data folder only when asked, the game's folder never.
 //!
 //! Nothing here deletes a folder it didn't make: the install folder is always called
-//! "Horizon Launcher" ([`folder_for`]) and is removed with `remove_dir`, which only takes an empty one.
+//! "Offrizon Launcher" ([`folder_for`]) and is removed with `remove_dir`, which only takes an empty one.
 //!
 //! Command lines (handled in `main` before the CLI parser, so MCP never sees them):
 //! `horizon-launcher-setup.exe` (window), `... setup --quiet [--dir <folder>] [--desktop-shortcut]`,
@@ -20,12 +20,12 @@ use std::path::{Path, PathBuf};
 use winreg::enums::{HKEY_CURRENT_USER, KEY_READ, KEY_WRITE};
 use winreg::RegKey;
 
-pub const APP_NAME: &str = "Horizon Launcher";
+pub const APP_NAME: &str = "Offrizon Launcher";
 const BINARY: &str = "horizon-launcher.exe";
-const PUBLISHER: &str = "Horizon";
+const PUBLISHER: &str = "Offrizon";
 const ABOUT_URL: &str = "https://playhorizon.dev";
 const UNINSTALL_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\HorizonLauncher";
-const OWN_KEY: &str = r"Software\Horizon\Launcher";
+const OWN_KEY: &str = r"Software\Offrizon\Launcher";
 const ASIDE_PREFIX: &str = "horizon-launcher-uninstall-";
 
 pub use crate::setup_args::Mode;
@@ -45,7 +45,7 @@ pub enum Step {
 
 #[derive(Clone, Debug)]
 pub struct Options {
-    /// Where the launcher goes (always a folder called "Horizon Launcher").
+    /// Where the launcher goes (always a folder called "Offrizon Launcher").
     pub dir: PathBuf,
     pub desktop: bool,
     /// Uninstall only: also delete the launcher's data folder.
@@ -104,7 +104,7 @@ fn invocation() -> Invocation {
     classify(&args(), is_setup_exe())
 }
 
-/// `%LOCALAPPDATA%\Programs\Horizon Launcher`; `HORIZON_LAUNCHER_SETUP_DIR` replaces it (tests).
+/// `%LOCALAPPDATA%\Programs\Offrizon Launcher`; `HORIZON_LAUNCHER_SETUP_DIR` replaces it (tests).
 pub fn default_dir() -> PathBuf {
     if let Some(dir) = std::env::var_os("HORIZON_LAUNCHER_SETUP_DIR").filter(|d| !d.is_empty()) {
         return folder_for(Path::new(&dir));
@@ -115,7 +115,7 @@ pub fn default_dir() -> PathBuf {
         .join(APP_NAME)
 }
 
-/// The install folder for a folder the player picked: always one called "Horizon Launcher", so
+/// The install folder for a folder the player picked: always one called "Offrizon Launcher", so
 /// uninstalling never has to guess what is ours.
 pub fn folder_for(chosen: &Path) -> PathBuf {
     if chosen
@@ -421,7 +421,7 @@ fn close_running_launchers(progress: &impl Fn(Step, f32)) {
 /// Takes the install away. Returns what could not be removed (a file in use, say).
 pub fn uninstall(remove_data: bool, progress: impl Fn(Step, f32)) -> Result<Vec<String>, String> {
     let dir = registered()
-        .ok_or("Horizon Launcher is not installed for this account.")?
+        .ok_or("Offrizon Launcher is not installed for this account.")?
         .dir;
     close_running_launchers(&progress);
     clean_aside(&dir);
@@ -456,14 +456,14 @@ pub fn uninstall(remove_data: bool, progress: impl Fn(Step, f32)) -> Result<Vec<
             Err(e) => left.push(format!(r"HKCU\{key}: {e}")),
         }
     }
-    // `Software\Horizon` goes only when nothing else (the game) keeps anything in it.
-    if let Ok(parent) = hkcu.open_subkey_with_flags(r"Software\Horizon", KEY_READ) {
+    // `Software\Offrizon` goes only when nothing else (the game) keeps anything in it.
+    if let Ok(parent) = hkcu.open_subkey_with_flags(r"Software\Offrizon", KEY_READ) {
         let empty = parent
             .query_info()
             .is_ok_and(|info| info.sub_keys == 0 && info.values == 0);
         drop(parent);
         if empty {
-            let _ = hkcu.delete_subkey(r"Software\Horizon");
+            let _ = hkcu.delete_subkey(r"Software\Offrizon");
         }
     }
 
@@ -588,7 +588,7 @@ mod tests {
     fn the_install_folder_is_always_ours() {
         assert_eq!(
             folder_for(Path::new(r"C:\Games")),
-            PathBuf::from(r"C:\Games\Horizon Launcher")
+            PathBuf::from(r"C:\Games\Offrizon Launcher")
         );
         assert_eq!(
             folder_for(Path::new(r"C:\Games\horizon launcher")),
@@ -630,10 +630,10 @@ mod tests {
             .map_or(temp.clone(), PathBuf::from);
         let dir = temp.join(format!("horizon-link-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
-        let exe = dir.join("Horizon Launcher").join("horizon-launcher.exe");
+        let exe = dir.join("Offrizon Launcher").join("horizon-launcher.exe");
         fs::create_dir_all(exe.parent().unwrap()).unwrap();
         fs::write(&exe, b"x").unwrap();
-        let link = dir.join("Horizon Launcher.lnk");
+        let link = dir.join("Offrizon Launcher.lnk");
         write_link(&link, &exe).unwrap();
         // The bug this guards: a link whose target the shell read as empty, so a double click did nothing.
         assert_eq!(

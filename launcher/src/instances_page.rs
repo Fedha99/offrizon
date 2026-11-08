@@ -37,7 +37,7 @@ pub(super) const TEXTURES: [&str; 24] = [
     "book",
 ];
 
-/// Colours offered as icons: Horizon's accent and a few that sit beside it in both themes.
+/// Colours offered as icons: Offrizon's accent and a few that sit beside it in both themes.
 const COLOURS: [&str; 8] = [
     "#5b3fd6", "#3f7fd6", "#2f9e8f", "#4f9e2f", "#c9a227", "#d9732f", "#c4405a", "#7d7591",
 ];
@@ -53,9 +53,9 @@ pub(super) struct InstanceDialog {
     pub(super) picture: Option<Option<instance_icons::Chosen>>,
     pub(super) error: Option<String>,
     pub(super) busy: bool,
-    /// Horizon, or the Java game it plays.
+    /// Offrizon, or the Java game it plays.
     pub(super) java: new_instance::JavaChoice,
-    /// The Horizon version it keeps (`Instance::version`); None follows the launcher's.
+    /// The Offrizon version it keeps (`Instance::version`); None follows the launcher's.
     pub(super) pin: Option<String>,
     /// The loader logo `picture` was made from, when it was one.
     pub(super) logo: Option<&'static str>,
@@ -238,9 +238,9 @@ impl Launcher {
                         summary.map_or_else(|| tr("Modpack").into(), |p| p.summary()),
                     )
                 }
-                InstanceKind::Pack => (false, tr("From Horizon's registry").into()),
+                InstanceKind::Pack => (false, tr("From Offrizon's registry").into()),
             };
-            // Java instances have nothing of Horizon's to prepare: no state square.
+            // Java instances have nothing of Offrizon's to prepare: no state square.
             let state = (matches!(i.kind, InstanceKind::Default | InstanceKind::Own)
                 && i.java.is_none())
             .then_some(if prepared { t.success } else { t.warn });
@@ -307,7 +307,7 @@ impl Launcher {
             java,
         });
         self.servers.text(Field::InstanceVersion).set(String::new());
-        // A new one starts with the name it would get ("My Horizon"), until the player types one.
+        // A new one starts with the name it would get ("My Offrizon"), until the player types one.
         if !editing_one {
             self.change(|_| {});
         }
@@ -342,7 +342,7 @@ impl Launcher {
         let selected = self.selected_instance().map(|i| i.id.clone());
         let name = self.servers.value(Field::InstanceName).trim().to_string();
         let group = Some(self.servers.value(Field::InstanceGroup).to_string());
-        // A Horizon version picked but not installed downloads once the instance is saved.
+        // A Offrizon version picked but not installed downloads once the instance is saved.
         let download = self
             .draft_horizon()
             .and_then(|tag| self.release_to_install(&tag));
@@ -370,10 +370,10 @@ impl Launcher {
         let editing = d.editing.clone();
         let edited = editing.is_some();
         let copy = selected.filter(|_| d.copy);
-        // The Horizon version is Horizon's instances' alone: a Java one plays its own game.
-        let plays_horizon = d.java.kind == new_instance::NewKind::Horizon;
+        // The Offrizon version is Offrizon's instances' alone: a Java one plays its own game.
+        let plays_horizon = d.java.kind == new_instance::NewKind::Offrizon;
         // A new Java instance: what it plays, and its name when none is typed.
-        let java = (editing.is_none() && d.java.kind != new_instance::NewKind::Horizon)
+        let java = (editing.is_none() && d.java.kind != new_instance::NewKind::Offrizon)
             .then(|| d.java.clone());
         let minecraft = java.as_ref().map(|j| {
             j.minecraft(match &self.instances.versions {
@@ -484,11 +484,11 @@ impl Launcher {
             d.busy,
             d.java.kind,
         );
-        let java = !editing && kind != new_instance::NewKind::Horizon;
+        let java = !editing && kind != new_instance::NewKind::Offrizon;
         let n = t.night;
         let from = self
             .selected_instance()
-            .map_or_else(|| "Horizon".into(), |i| i.name.clone());
+            .map_or_else(|| "Offrizon".into(), |i| i.name.clone());
         let row = |label: &'static str, control: AnyElement| {
             div()
                 .flex()
@@ -592,7 +592,7 @@ impl Launcher {
                     .into_any_element(),
             );
         }
-        // Nothing chosen: the instance's mark (its loader's, Horizon's), when it has one.
+        // Nothing chosen: the instance's mark (its loader's, Offrizon's), when it has one.
         let mark = instance.as_ref().and_then(|i| self.instance_mark(i, 28.));
         tiles.push(
             tile("instance-icon-none".into(), icon.is_none() && !pictured)
@@ -862,7 +862,7 @@ impl Launcher {
 }
 
 impl Launcher {
-    /// Delete…, for every instance but Horizon's own (the game's home); not while a game runs.
+    /// Delete…, for every instance but Offrizon's own (the game's home); not while a game runs.
     fn delete_button(&self, instance: &Instance, cx: &mut Context<Self>) -> Option<Stateful<Div>> {
         if instance.kind == InstanceKind::Default {
             return None;
@@ -941,7 +941,7 @@ impl Launcher {
                 }
                 self.instances.confirm_delete = None;
                 self.instances.delete_error = None;
-                // Play starts Horizon again; the window's copy of the settings says so too.
+                // Play starts Offrizon again; the window's copy of the settings says so too.
                 if self.settings.instance.as_deref() == Some(id) {
                     self.settings.instance = None;
                     self.save_settings();

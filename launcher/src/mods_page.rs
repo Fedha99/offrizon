@@ -1,9 +1,9 @@
 //! The Mods page: its tabs are the kinds (mods, modpacks, resource packs, shader packs, data
-//! packs). Search Horizon's own registry for what was made for Horizon, or Modrinth (CurseForge:
+//! packs). Search Offrizon's own registry for what was made for Offrizon, or Modrinth (CurseForge:
 //! coming soon) for Java mods, modpacks, resource packs and data packs (a Java instance's files
 //! always come from Modrinth, for its version), see where each comes
-//! from and how well it runs (a Java mod's jar is checked first; a Horizon mod says whether it is
-//! signed and what it may do), install it with its checksum checked, turn Horizon mods on and
+//! from and how well it runs (a Java mod's jar is checked first; a Offrizon mod says whether it is
+//! signed and what it may do), install it with its checksum checked, turn Offrizon mods on and
 //! off, and update or remove what was installed (`horizon_launcher::browser`). Imported modpacks
 //! are listed on its Modpacks tab.
 use super::line_edit::{self, Key, LineEdit};
@@ -32,7 +32,7 @@ const CHECKING: usize = 2;
 /// The sources to pick from on the tabs that have both ([`switches`]); CurseForge is shown
 /// beside them as coming soon.
 pub(super) const SOURCES: [(SourceId, &str); 2] = [
-    (SourceId::Horizon, "Horizon"),
+    (SourceId::Offrizon, "Offrizon"),
     (SourceId::Modrinth, "Modrinth"),
 ];
 const PAGE: usize = 20;
@@ -48,7 +48,7 @@ pub(super) enum Event {
     Updates(HashMap<(SourceId, String), String>),
     /// A Java mod's check: its jar read, or why it couldn't be.
     Checked((SourceId, String), Result<Box<Check>, String>),
-    /// What a Horizon registry project says before install: signed or not, what it may do.
+    /// What a Offrizon registry project says before install: signed or not, what it may do.
     About(HashMap<String, Vec<String>>),
     /// Registry files taken down that the launcher turned off.
     TakenDown(Vec<String>),
@@ -120,7 +120,7 @@ pub(super) struct Mods {
     native_files: std::cell::RefCell<Option<(String, Vec<native_status::Installed>)>>,
     /// Java mods' checks, by source and project.
     pub(super) checks: HashMap<(SourceId, String), Checking>,
-    /// Horizon registry projects' trust and capabilities, by id ([`horizon::trust_and_capabilities`]).
+    /// Offrizon registry projects' trust and capabilities, by id ([`horizon::trust_and_capabilities`]).
     pub(super) about: HashMap<String, Vec<String>>,
     /// The project page, filters and images.
     pub(super) browse: super::mods_project::Browse,
@@ -232,7 +232,7 @@ impl Mods {
     pub(super) fn checking(&self, p: &Project) -> bool {
         self.java_for(p.kind).is_none()
             && p.kind == PackKind::Mod
-            && p.source != SourceId::Horizon
+            && p.source != SourceId::Offrizon
             && matches!(
                 self.checks.get(&(p.source, p.id.clone())),
                 None | Some(Checking::Running)
@@ -247,7 +247,7 @@ impl Mods {
             return Support::Works;
         }
         let metadata = p.support();
-        if p.kind != PackKind::Mod || p.source == SourceId::Horizon || !metadata.installable() {
+        if p.kind != PackKind::Mod || p.source == SourceId::Offrizon || !metadata.installable() {
             return metadata;
         }
         match self.checks.get(&(p.source, p.id.clone())) {
@@ -480,7 +480,7 @@ impl Launcher {
                 ..Query::new(m.text.text(), m.kind)
             },
         };
-        // A Java instance's files are Modrinth's; Horizon's registry is for Horizon.
+        // A Java instance's files are Modrinth's; Offrizon's registry is for Offrizon.
         let source = match m.java_for(m.kind) {
             Some(_) => SourceId::Modrinth,
             None => m.source,
@@ -491,7 +491,7 @@ impl Launcher {
                 .ok_or_else(|| trf("{source} isn't set up.", &[("source", source.label())]))
                 .and_then(|s| s.search(&query));
             let about: HashMap<String, Vec<String>> = match (&result, source) {
-                (Ok(found), SourceId::Horizon) => {
+                (Ok(found), SourceId::Offrizon) => {
                     let instance = horizon_launcher::instances::selected();
                     found
                         .iter()
@@ -517,7 +517,7 @@ impl Launcher {
             .mods
             .installed
             .iter()
-            .any(|e| e.source == SourceId::Horizon)
+            .any(|e| e.source == SourceId::Offrizon)
         {
             return;
         }
@@ -534,7 +534,7 @@ impl Launcher {
         });
     }
 
-    /// At start, with the setting on: every Horizon instance's registry projects update on a
+    /// At start, with the setting on: every Offrizon instance's registry projects update on a
     /// thread ([`auto_update`]), the selected instance's list read again after.
     pub(super) fn mods_auto_update(&mut self) {
         if !self.settings.auto_updates_mods() {
@@ -559,7 +559,7 @@ impl Launcher {
         });
     }
 
-    /// Turns a Horizon mod the browser installed on or off, as the game's Options > Mods does;
+    /// Turns a Offrizon mod the browser installed on or off, as the game's Options > Mods does;
     /// in a Java instance, renames its file.
     pub(super) fn mods_switch(&mut self, e: &installed::Entry) {
         let home = self.mods.home();
@@ -608,7 +608,7 @@ impl Launcher {
         }
         let todo: Vec<Project> = found
             .into_iter()
-            .filter(|p| p.kind == PackKind::Mod && p.source != SourceId::Horizon)
+            .filter(|p| p.kind == PackKind::Mod && p.source != SourceId::Offrizon)
             .filter(|p| p.support().installable())
             .filter(|p| !m.checks.contains_key(&(p.source, p.id.clone())))
             .collect();
@@ -758,7 +758,7 @@ impl Launcher {
             return;
         }
         // The first native mod: the trust notice, before anything is installed.
-        let first_native = source == SourceId::Horizon
+        let first_native = source == SourceId::Offrizon
             && !self.settings.native_mods_noticed
             && horizon::is_native_mod(&id);
         if first_native {
@@ -783,7 +783,7 @@ impl Launcher {
         let java = self.mods.java.clone();
         let instance = self
             .selected_instance()
-            .map_or_else(|| "Horizon".to_string(), |i| i.name.clone());
+            .map_or_else(|| "Offrizon".to_string(), |i| i.name.clone());
         let world = self.mods.world.clone().and_then(|path| {
             let (_, name) = self.mods.worlds.iter().find(|(p, _)| *p == path)?;
             Some((path, name.clone()))
@@ -835,7 +835,7 @@ impl Launcher {
                         ));
                     }
                     modpack = p.kind == PackKind::Modpack;
-                    if modpack && p.source == SourceId::Horizon {
+                    if modpack && p.source == SourceId::Offrizon {
                         let pack = horizon::pack::install(&p.id, &progress)?;
                         if let Some(url) = &p.icon {
                             horizon_launcher::instances::adopt_icon(
@@ -884,7 +884,7 @@ impl Launcher {
                             &[("mods", &mods), ("instance", &instance)],
                         ));
                     }
-                    if p.source == SourceId::Horizon && p.kind == PackKind::Mod {
+                    if p.source == SourceId::Offrizon && p.kind == PackKind::Mod {
                         return Ok(trf(
                             "Installed {mods} into horizon-mods and turned it on, checksum \
                              checked (Options > Mods in the game).",
@@ -1064,7 +1064,7 @@ impl Launcher {
         removed
     }
 
-    /// The palette's search (`glass_palette`): up to four of Horizon's registry mods for `text`,
+    /// The palette's search (`glass_palette`): up to four of Offrizon's registry mods for `text`,
     /// answered as [`Event::Palette`]. None for a Java instance, which takes Modrinth's files.
     pub(super) fn palette_mods(&mut self, text: &str, search: u64) {
         self.mods_load();
@@ -1077,7 +1077,7 @@ impl Launcher {
             ..Query::new(text, PackKind::Mod)
         };
         std::thread::spawn(move || {
-            let found = browser::source(SourceId::Horizon)
+            let found = browser::source(SourceId::Offrizon)
                 .ok_or_else(|| "not set up".to_string())
                 .and_then(|s| s.search(&query))
                 .unwrap_or_default();
@@ -1102,7 +1102,7 @@ impl Launcher {
         }
         let header = page_header(
             "Mods",
-            "Mods and shader packs made for Horizon from its own reviewed registry, and \
+            "Mods and shader packs made for Offrizon from its own reviewed registry, and \
              resource packs from Modrinth. Each file is checked against its source's checksum \
              before it reaches your game folder.",
             &t,
@@ -1142,9 +1142,9 @@ impl Launcher {
         let java = self.mods.java_for(self.mods.kind).is_some();
         let source_note = (switches(self.mods.kind) && !java)
             .then(|| div().flex().child(self.mods_source_switch(cx)));
-        // The registry lists only what was made for Horizon: no "everything", and of the filters
+        // The registry lists only what was made for Offrizon: no "everything", and of the filters
         // only its categories.
-        let registry = self.mods.source == SourceId::Horizon && !java;
+        let registry = self.mods.source == SourceId::Offrizon && !java;
         let filters = self.mods_filters(cx);
         // The registry's sort sits below the GitHub row, above the list it orders.
         let registry_sort = registry.then(|| self.mods_sort_bar(cx));
@@ -1186,7 +1186,7 @@ impl Launcher {
                 .child(section_title("Browse modpacks", "search", &t));
         }
         body = body.child(controls);
-        // Native mods from a GitHub link: Horizon instances, on the Mods tab.
+        // Native mods from a GitHub link: Offrizon instances, on the Mods tab.
         if self.mods.kind == PackKind::Mod && self.mods.java.is_none() {
             body = body.child(self.github_panel(cx));
         }
@@ -1446,7 +1446,7 @@ impl Launcher {
             let on = match &self.mods.java {
                 _ if e.kind != PackKind::Mod => None,
                 Some(_) => Some(java_instance::is_on(&self.mods.home(), e)),
-                None if e.source == SourceId::Horizon => Some(
+                None if e.source == SourceId::Offrizon => Some(
                     horizon::mod_id(e).is_some_and(|id| java::is_enabled(&self.mods.home(), id)),
                 ),
                 None => None,
@@ -1587,8 +1587,8 @@ impl Launcher {
     }
 
     /// The selected instance's native build (docs/native-mods.md): which build it plays, the
-    /// Horizon it was built on, and whether it holds the native mods turned on (Up to date,
-    /// Needs rebuild, Not built), with Build, and Update when a newer Horizon is installed. Both
+    /// Offrizon it was built on, and whether it holds the native mods turned on (Up to date,
+    /// Needs rebuild, Not built), with Build, and Update when a newer Offrizon is installed. Both
     /// open the trust warning first (`native_warning`). A build under way, or its error, shows
     /// only on the instance it is for.
     pub(super) fn native_build(&self, cx: &mut Context<Self>) -> Option<Div> {
@@ -1617,8 +1617,8 @@ impl Launcher {
             Some(b) if !b.pinned_by.is_empty() => b.pinned_by.clone(),
             _ => pinned,
         };
-        // Rebuilding on a newer Horizon, or on the build's own one when mods pinned another
-        // commit, builds every mod on that Horizon's commit (`on_base`).
+        // Rebuilding on a newer Offrizon, or on the build's own one when mods pinned another
+        // commit, builds every mod on that Offrizon's commit (`on_base`).
         let update = build
             .as_ref()
             .filter(|_| state != State::NoMods)
@@ -1671,11 +1671,11 @@ impl Launcher {
         if let (Some(tag), Some(build)) = (&version, &build) {
             let said = match pinned.is_empty() {
                 true => trf(
-                    "Plays {build}, built on Horizon {version}.",
+                    "Plays {build}, built on Offrizon {version}.",
                     &[("build", tag), ("version", &build.horizon())],
                 ),
                 false => trf(
-                    "Plays {build}, built on Horizon {commit}, the commit pinned by {mods}, not on {version}.",
+                    "Plays {build}, built on Offrizon {commit}, the commit pinned by {mods}, not on {version}.",
                     &[
                         ("build", tag),
                         ("commit", &build.horizon[..build.horizon.len().min(7)]),
@@ -1718,7 +1718,7 @@ impl Launcher {
                 button(
                     "native-update",
                     trf(
-                        "Rebuild on Horizon {version}",
+                        "Rebuild on Offrizon {version}",
                         &[("version", &native_status::horizon_label(&newer))],
                     ),
                     Kind::Secondary,
@@ -1814,12 +1814,12 @@ impl Launcher {
                     ),
                     &t,
                 );
-            } else if m.source == SourceId::Horizon {
-                tr("Nothing in Horizon's registry matches yet.")
+            } else if m.source == SourceId::Offrizon {
+                tr("Nothing in Offrizon's registry matches yet.")
             } else if m.everything {
                 tr("Nothing found.")
             } else {
-                tr("Nothing found that runs in Horizon. Show everything lists the rest.")
+                tr("Nothing found that runs in Offrizon. Show everything lists the rest.")
             };
             return centered(line, &t);
         }
@@ -1902,7 +1902,7 @@ impl Launcher {
                 .child(div().truncate().child(p.summary.clone()))
                 .child(by.join(" · "))
                 .children(
-                    (p.source == SourceId::Horizon)
+                    (p.source == SourceId::Offrizon)
                         .then(|| stars(&p.id, &t))
                         .flatten(),
                 )
@@ -1914,7 +1914,7 @@ impl Launcher {
                 .children(
                     m.about
                         .get(&p.id)
-                        .filter(|_| p.source == SourceId::Horizon)
+                        .filter(|_| p.source == SourceId::Offrizon)
                         .map(|lines| div().text_color(t.ink_soft).child(lines.join(" · "))),
                 );
             let open = p.clone();
@@ -1967,7 +1967,7 @@ pub(super) struct AutoTarget {
 }
 
 /// Whether `instance` keeps a Nightly, or a native build made on one: its native mods stay as
-/// they are, built for that Horizon.
+/// they are, built for that Offrizon.
 pub(super) fn pinned_to_nightly(instance: &instances::Instance) -> bool {
     let nightly = |v: &str| v.starts_with("nightly-");
     instance
@@ -1976,7 +1976,7 @@ pub(super) fn pinned_to_nightly(instance: &instances::Instance) -> bool {
         .is_some_and(|v| nightly(v) || native_mods::about(v).is_some_and(|a| nightly(&a.base)))
 }
 
-/// Updates the registry projects of `targets`: Horizon's own instances only, never a modpack's
+/// Updates the registry projects of `targets`: Offrizon's own instances only, never a modpack's
 /// profile, whose pack pins its mods. What happened, for the page's notice, and the instances
 /// whose native mods were updated.
 pub(super) fn auto_update(targets: &[AutoTarget]) -> (Vec<String>, Vec<String>) {
@@ -2002,23 +2002,23 @@ pub(super) fn auto_update(targets: &[AutoTarget]) -> (Vec<String>, Vec<String>) 
     (lines, rebuild)
 }
 
-/// Where a kind's tab searches first: Horizon's registry for mods and shader packs, Modrinth for
+/// Where a kind's tab searches first: Offrizon's registry for mods and shader packs, Modrinth for
 /// the rest.
 fn source_for(kind: PackKind) -> SourceId {
     match kind {
-        PackKind::Mod | PackKind::Shader => SourceId::Horizon,
+        PackKind::Mod | PackKind::Shader => SourceId::Offrizon,
         PackKind::ResourcePack | PackKind::Modpack | PackKind::DataPack => SourceId::Modrinth,
     }
 }
 
 /// Whether a kind's tab picks its source: mods, modpacks, resource packs and data packs are on
-/// both Horizon's registry and Modrinth; Horizon's shader packs are on its registry only.
+/// both Offrizon's registry and Modrinth; Offrizon's shader packs are on its registry only.
 pub(super) fn switches(kind: PackKind) -> bool {
     kind != PackKind::Shader
 }
 
 impl Launcher {
-    /// The source switch: Modrinth or Horizon's registry, CurseForge shown as coming soon and not
+    /// The source switch: Modrinth or Offrizon's registry, CurseForge shown as coming soon and not
     /// clickable, like the Microsoft account's "Coming soon".
     fn mods_source_switch(&self, cx: &mut Context<Self>) -> Stateful<Div> {
         let this = cx.entity().downgrade();

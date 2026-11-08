@@ -133,7 +133,7 @@ impl Launcher {
         self.native_log.stale = true;
     }
 
-    /// Records a failure from before the build itself started (no Horizon to build on, no mods
+    /// Records a failure from before the build itself started (no Offrizon to build on, no mods
     /// to build), where the build's own output would have gone.
     pub(super) fn native_log_preflight(&mut self, error: &str) {
         if self.native_log.reset.is_none() {

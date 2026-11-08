@@ -315,7 +315,7 @@ impl Launcher {
             .child(body)
     }
 
-    /// The patch log (`PatchLog`): a Horizon instance's Nightly changes by section (the newest
+    /// The patch log (`PatchLog`): a Offrizon instance's Nightly changes by section (the newest
     /// Nightly's when it plays another version), else the newest launcher release's; "All
     /// notes" opening Patch notes. It fills its column and scrolls inside.
     fn patch_log(&self, cx: &mut Context<Self>) -> Stateful<Div> {
@@ -546,7 +546,7 @@ mod tests {
             ),
             release(
                 "launcher@0.2.37",
-                "Horizon launcher 0.2.37",
+                "Offrizon launcher 0.2.37",
                 "2026-11-02",
                 false,
                 "### Fixed\n- Launcher fix",

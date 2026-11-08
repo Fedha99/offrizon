@@ -361,7 +361,7 @@ impl Launcher {
                         .mt(px(12.))
                         .line_height(px(18.))
                         .child(tr(
-                            "Microsoft's own page opens in your browser. Horizon never sees your \
+                            "Microsoft's own page opens in your browser. Offrizon never sees your \
                              password.",
                         )),
                 )

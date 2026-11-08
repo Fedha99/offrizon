@@ -10,7 +10,7 @@ use gpui::{img, ImageFormat};
 use horizon_theme::glass::{fill, ink, radius};
 use std::sync::{Arc, LazyLock};
 
-/// The mockup's pictures for each game mode (`COVERS`): Horizon screenshots from `docs/media`.
+/// The mockup's pictures for each game mode (`COVERS`): Offrizon screenshots from `docs/media`.
 static COVERS: LazyLock<[Arc<gpui::Image>; 3]> = LazyLock::new(|| {
     let webp = |bytes: &[u8]| Arc::new(gpui::Image::from_bytes(ImageFormat::Webp, bytes.to_vec()));
     [
@@ -517,7 +517,7 @@ impl Launcher {
             );
         }
 
-        // Account checks (not in the mockup's words: Horizon players sign in with Microsoft now).
+        // Account checks (not in the mockup's words: Offrizon players sign in with Microsoft now).
         let accounts = div()
             .flex()
             .items_start()

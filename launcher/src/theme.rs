@@ -1,6 +1,6 @@
-//! The launcher's view of Horizon's design tokens (`crates/horizon-theme`, described in
+//! The launcher's view of Offrizon's design tokens (`crates/horizon-theme`, described in
 //! `docs/design-system.md`): the night look (`horizon_theme::night`, a night sky or a dawn with
-//! Horizon's violet) in Bricolage Grotesque, with Geist Mono for paths and codes (all bundled, SIL
+//! Offrizon's violet) in Bricolage Grotesque, with Geist Mono for paths and codes (all bundled, SIL
 //! Open Font License). Screens not rebuilt yet draw the Blocks parts in the night's colours.
 use gpui::{rgb, Hsla, WindowAppearance};
 use horizon_launcher::backend::{Appearance, Settings};
@@ -257,7 +257,7 @@ mod tests {
     use horizon_launcher::themes::Accent;
 
     /// Nord asks for the solid, square Blocks look: no glass, and its own polar-night palette
-    /// with the frost accent rather than Horizon's violet glass colours.
+    /// with the frost accent rather than Offrizon's violet glass colours.
     #[test]
     fn a_palette_theme_is_solid_and_square() {
         let settings = Settings {

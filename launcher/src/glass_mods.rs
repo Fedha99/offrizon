@@ -5,13 +5,13 @@
 //! icon, name, line, summary, what it may do, downloads, and Install in or Remove from the
 //! instance).
 //!
-//! The mockup's tabs are its sources (Horizon, Modrinth, CurseForge soon); the launcher's page
+//! The mockup's tabs are its sources (Offrizon, Modrinth, CurseForge soon); the launcher's page
 //! is by kind (mods, modpacks, resource packs, shader packs, data packs), each with its sources,
-//! so the tabs are the kinds and the sources are a switch under the search: Horizon's registry
+//! so the tabs are the kinds and the sources are a switch under the search: Offrizon's registry
 //! or Modrinth, CurseForge beside them as coming soon, on the kinds both serve (`switches`):
-//! shader packs are Horizon's registry's only, and a Java
-//! instance's files always Modrinth's. Modrinth's Java mods are offered to a Horizon instance
-//! too, each marked Works, Partly or Doesn't run in Horizon. Not in the mockup, kept in its
+//! shader packs are Offrizon's registry's only, and a Java
+//! instance's files always Modrinth's. Modrinth's Java mods are offered to a Offrizon instance
+//! too, each marked Works, Partly or Doesn't run in Offrizon. Not in the mockup, kept in its
 //! patterns: Show everything, the filters, which instance or world installs go to (under the
 //! search); the
 //! project's page, its rating and why it runs or not (in the project's card); adding a native mod
@@ -29,14 +29,14 @@ impl Launcher {
     /// The search's placeholder: the registry's count when it is listed whole.
     pub(super) fn mods_placeholder(&self) -> SharedString {
         let m = &self.mods;
-        let registry = m.source == SourceId::Horizon && m.java.is_none();
+        let registry = m.source == SourceId::Offrizon && m.java.is_none();
         if registry && m.kind == PackKind::Mod && m.searched && m.text.text().is_empty() {
             // Results come in pages: only a last page gives the real count.
             if m.more {
-                return tr("Search Horizon mods").into();
+                return tr("Search Offrizon mods").into();
             }
             trf(
-                "Search {count} Horizon mods",
+                "Search {count} Offrizon mods",
                 &[("count", &m.results.len().to_string())],
             )
             .into()
@@ -53,7 +53,7 @@ impl Launcher {
         let t = self.theme;
         let instance = self
             .selected_instance()
-            .map_or_else(|| "Horizon".to_owned(), |i| i.name.clone());
+            .map_or_else(|| "Offrizon".to_owned(), |i| i.name.clone());
         let head = ui::page_head(
             tr("Mods"),
             trf(
@@ -127,7 +127,7 @@ impl Launcher {
         }
 
         let java = self.mods.java_for(self.mods.kind).is_some();
-        let registry = self.mods.source == SourceId::Horizon && !java;
+        let registry = self.mods.source == SourceId::Offrizon && !java;
         let everything = self.mods.everything;
         let extras = div()
             .flex()
@@ -225,7 +225,7 @@ impl Launcher {
             )
     }
 
-    /// The source switch (`switches`): Horizon's registry or Modrinth as small tabs, CurseForge
+    /// The source switch (`switches`): Offrizon's registry or Modrinth as small tabs, CurseForge
     /// after them as coming soon, shown, inert, never searched, as in the mockup.
     fn glass_source_switch(&mut self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
@@ -375,12 +375,12 @@ impl Launcher {
                     "Nothing matches “{query}”.",
                     &[("query", m.text.text().trim())],
                 )
-            } else if m.source == SourceId::Horizon {
-                tr("Nothing in Horizon's registry matches yet.").to_string()
+            } else if m.source == SourceId::Offrizon {
+                tr("Nothing in Offrizon's registry matches yet.").to_string()
             } else if m.everything {
                 tr("Nothing found.").to_string()
             } else {
-                tr("Nothing found that runs in Horizon. Show everything lists the rest.")
+                tr("Nothing found that runs in Offrizon. Show everything lists the rest.")
                     .to_string()
             };
             return ui::text(14., FontWeight::NORMAL, 0.6)
@@ -433,7 +433,7 @@ impl Launcher {
                 div().flex_none().w(px(20.)).into_any_element()
             };
             // The registry's rows end with downloads, the others' with how they run (`compat`).
-            let right = if p.source == SourceId::Horizon {
+            let right = if p.source == SourceId::Offrizon {
                 ui::text(13., FontWeight::NORMAL, 0.5).child(count(p.downloads).to_uppercase())
             } else {
                 let support = m.support(&p);
@@ -573,7 +573,7 @@ impl Launcher {
         let about = m
             .about
             .get(&p.id)
-            .filter(|_| p.source == SourceId::Horizon)
+            .filter(|_| p.source == SourceId::Offrizon)
             .map(|lines| lines.join(" · "));
 
         // The action: Remove (then Remove for good), Install or Import, or why not.
@@ -669,7 +669,7 @@ impl Launcher {
                         .child(by.join(" · ")),
                 )
                 .children(
-                    (p.source == SourceId::Horizon)
+                    (p.source == SourceId::Offrizon)
                         .then(|| stars(&p.id, &t))
                         .flatten()
                         .map(|s| s.mt(px(8.))),
@@ -693,7 +693,7 @@ impl Launcher {
                         .font_weight(FontWeight::MEDIUM)
                         .text_color(tone)
                         .child(trf(
-                            "{support} in Horizon",
+                            "{support} in Offrizon",
                             &[("support", tr(support.label()))],
                         )),
                 )

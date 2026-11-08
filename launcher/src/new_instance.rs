@@ -1,4 +1,4 @@
-//! New instance's kinds (docs/design-system.md, "Night"; plan R0, screen 4): Horizon, Vanilla
+//! New instance's kinds (docs/design-system.md, "Night"; plan R0, screen 4): Offrizon, Vanilla
 //! (Minecraft: Java Edition as Mojang ships it) and Modded (with Fabric, Quilt, Forge or NeoForge). A Java kind picks
 //! its version from Mojang's public list (`minecraft_versions`), fetched once when the dialog first
 //! needs it; the game itself comes with the first Play, for an account that owns it.
@@ -16,7 +16,7 @@ const ROWS: usize = 60;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum NewKind {
-    Horizon,
+    Offrizon,
     Vanilla,
     Modded,
 }
@@ -61,7 +61,7 @@ impl LoaderVersions {
 impl Default for JavaChoice {
     fn default() -> Self {
         JavaChoice {
-            kind: NewKind::Horizon,
+            kind: NewKind::Offrizon,
             loader: Loader::Fabric,
             version: None,
             snapshots: false,
@@ -118,7 +118,7 @@ impl Launcher {
     }
 
     /// The name a new instance gets for what it plays now (the mockup's `defaultName`): "My
-    /// Horizon", "Vanilla 1.21.4", "Fabric 1.21.4", numbered past the ones already taken.
+    /// Offrizon", "Vanilla 1.21.4", "Fabric 1.21.4", numbered past the ones already taken.
     fn default_name(&self) -> Option<String> {
         let j = &self.instances.dialog.as_ref()?.java;
         let versions = match &self.instances.versions {
@@ -126,7 +126,7 @@ impl Launcher {
             _ => None,
         };
         let base = match j.kind {
-            NewKind::Horizon => tr("My Horizon").to_string(),
+            NewKind::Offrizon => tr("My Offrizon").to_string(),
             _ => j.default_name(&j.minecraft(versions)?),
         };
         let taken: Vec<&str> = self
@@ -168,7 +168,7 @@ impl Launcher {
     /// Picks the dialog's kind; a Java one fetches Mojang's list the first time.
     pub(super) fn pick_kind(&mut self, kind: NewKind, cx: &mut Context<Self>) {
         self.change(|j| j.kind = kind);
-        if kind != NewKind::Horizon {
+        if kind != NewKind::Offrizon {
             self.load_versions(cx);
         }
     }
@@ -236,13 +236,13 @@ impl Launcher {
         .detach();
     }
 
-    /// The tabs over a new instance's dialog: Horizon, Vanilla, Modded.
+    /// The tabs over a new instance's dialog: Offrizon, Vanilla, Modded.
     pub(super) fn kind_tabs(&self, cx: &mut Context<Self>) -> Div {
         let t = self.theme;
         let now = self.instances.dialog.as_ref().map(|d| d.java.kind);
         div().flex().gap(px(4.)).children(
             [
-                (NewKind::Horizon, "Horizon"),
+                (NewKind::Offrizon, "Offrizon"),
                 (NewKind::Vanilla, "Vanilla"),
                 (NewKind::Modded, "Modded"),
             ]
@@ -577,10 +577,10 @@ mod tests {
 
     #[test]
     fn a_default_name_skips_the_ones_taken() {
-        assert_eq!(free_name("My Horizon".into(), &["Horizon"]), "My Horizon");
+        assert_eq!(free_name("My Offrizon".into(), &["Offrizon"]), "My Offrizon");
         assert_eq!(
-            free_name("My Horizon".into(), &["my horizon", "My Horizon 2"]),
-            "My Horizon 3"
+            free_name("My Offrizon".into(), &["my horizon", "My Offrizon 2"]),
+            "My Offrizon 3"
         );
     }
 }

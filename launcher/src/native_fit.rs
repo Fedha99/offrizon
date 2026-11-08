@@ -1,6 +1,6 @@
-//! Whether a native mod fits the Horizon the player plays, said before it is installed (#9860),
-//! so a mod made for another Horizon is no surprise at build time. A mod naming a hook points'
-//! version fits any Horizon with that `NATIVE_HOOKS_API` or a later one; a pinned mod fits the
+//! Whether a native mod fits the Offrizon the player plays, said before it is installed (#9860),
+//! so a mod made for another Offrizon is no surprise at build time. A mod naming a hook points'
+//! version fits any Offrizon with that `NATIVE_HOOKS_API` or a later one; a pinned mod fits the
 //! commit it pins (docs/native-mods.md, "Pinned to a Nightly").
 use crate::i18n::{tr, trf};
 use crate::instances::Instance;
@@ -11,7 +11,7 @@ use std::path::Path;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-/// The Horizon the selected instance plays: the commit its game was compiled from and that
+/// The Offrizon the selected instance plays: the commit its game was compiled from and that
 /// commit's hook points' version (None when it couldn't be read).
 #[derive(Clone, Debug, PartialEq)]
 pub struct Plays {
@@ -22,16 +22,16 @@ pub struct Plays {
 /// How a native mod fits [`Plays`].
 #[derive(Clone, Debug, PartialEq)]
 pub enum Fit {
-    /// It builds on the Horizon the player plays.
+    /// It builds on the Offrizon the player plays.
     Fits,
-    /// It needs hook points the player's Horizon doesn't have yet.
+    /// It needs hook points the player's Offrizon doesn't have yet.
     NeedsNewer { needs: u32, has: u32 },
     /// It pins another commit, and mods turned on pin yet another one: the build asks for
     /// Build anyway, and the mods made for the other commit may not compile.
     Clashes { pin: String, with: Vec<String> },
     /// It pins another commit, alone: the build compiles the game on that commit.
     MovesTo { pin: String },
-    /// The registry found it doesn't apply on the Horizon the player plays (horizon-mixins'
+    /// The registry found it doesn't apply on the Offrizon the player plays (horizon-mixins'
     /// `code`): a build leaves it out.
     Broken { code: String },
 }
@@ -39,8 +39,8 @@ pub enum Fit {
 /// How mod `id` fits: it names hook points' version `hooks`, else pins commit `pin`. `pins` are
 /// the mods turned on that pin a commit (id, commit); the mod's own older version among them is
 /// replaced by this one. `broken_on` are the commits the registry found it doesn't apply on: one
-/// it would build on, the Horizon played, makes it [`Fit::Broken`]. None when the hook points of
-/// the Horizon played aren't known.
+/// it would build on, the Offrizon played, makes it [`Fit::Broken`]. None when the hook points of
+/// the Offrizon played aren't known.
 pub fn fit(
     id: &str,
     hooks: Option<u32>,
@@ -89,21 +89,21 @@ fn short(revision: &str) -> &str {
 /// What the player reads about `fit`.
 pub fn describe(fit: &Fit, plays: &Plays) -> String {
     match fit {
-        Fit::Fits => tr("Builds on the Horizon you play").to_owned(),
+        Fit::Fits => tr("Builds on the Offrizon you play").to_owned(),
         Fit::NeedsNewer { needs, has } => trf(
-            "Needs native hook points v{needs}, the Horizon you play has v{has}: update Horizon first",
+            "Needs native hook points v{needs}, the Offrizon you play has v{has}: update Offrizon first",
             &[("needs", &needs.to_string()), ("has", &has.to_string())],
         ),
         Fit::Clashes { pin, with } => trf(
-            "Made for Horizon {pin}, but {mods} pin another commit: the build will ask you to Build anyway and may not compile",
+            "Made for Offrizon {pin}, but {mods} pin another commit: the build will ask you to Build anyway and may not compile",
             &[("pin", short(pin)), ("mods", &with.join(", "))],
         ),
         Fit::MovesTo { pin } => trf(
-            "Made for Horizon {pin}, you play {yours}: the launcher builds your game on {pin}",
+            "Made for Offrizon {pin}, you play {yours}: the launcher builds your game on {pin}",
             &[("pin", short(pin)), ("yours", short(&plays.revision))],
         ),
         Fit::Broken { code } => trf(
-            "Doesn't build on the Horizon you play ({code}): a build leaves it out until its author updates it",
+            "Doesn't build on the Offrizon you play ({code}): a build leaves it out until its author updates it",
             &[("code", code)],
         ),
     }
@@ -127,7 +127,7 @@ fn cached(cache: &Known, key: &CacheKey) -> Option<Option<Plays>> {
         .map(|(_, plays)| plays.clone())
 }
 
-/// The Horizon `instance` plays; None for a Java instance, when nothing is installed, or when
+/// The Offrizon `instance` plays; None for a Java instance, when nothing is installed, or when
 /// GitHub can't say its commit.
 pub fn plays(instance: &Instance) -> Option<Plays> {
     if instance.java.is_some() {
@@ -245,7 +245,7 @@ mod tests {
         );
         assert_eq!(
             describe(&found.unwrap(), &at_28),
-            "Doesn't build on the Horizon you play (E_TARGET_NOT_FOUND): a build leaves it out until its author updates it"
+            "Doesn't build on the Offrizon you play (E_TARGET_NOT_FOUND): a build leaves it out until its author updates it"
         );
         // Broken on another commit than the one played: as before.
         let elsewhere = [BrokenOn {
@@ -256,7 +256,7 @@ mod tests {
             fit("eatinganimation", Some(1), OTHER, &at_28, &[], &elsewhere),
             Some(Fit::Fits)
         );
-        // A mod pinning another commit builds there, not on the Horizon played.
+        // A mod pinning another commit builds there, not on the Offrizon played.
         assert_eq!(
             fit("jei", None, OTHER, &at_28, &[], &broken),
             Some(Fit::MovesTo { pin: OTHER.into() })

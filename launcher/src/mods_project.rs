@@ -316,7 +316,7 @@ impl Launcher {
     /// The orders the current source can sort by, "Best match" first.
     pub(super) fn mods_sorts(&self) -> Vec<(Option<Sort>, &'static str)> {
         let own =
-            self.mods.source == SourceId::Horizon && self.mods.java_for(self.mods.kind).is_none();
+            self.mods.source == SourceId::Offrizon && self.mods.java_for(self.mods.kind).is_none();
         let all: &[Sort] = if own {
             &browser::horizon::SORTS
         } else {
@@ -427,7 +427,7 @@ impl Launcher {
         wrap
     }
 
-    /// The filter bar: sort always (Horizon's registry has its own bar); loader, version,
+    /// The filter bar: sort always (Offrizon's registry has its own bar); loader, version,
     /// environment and categories when shown, only categories and tags for the registry. While
     /// the panel is closed, what is picked stays in view as chips that each remove theirs.
     pub(super) fn mods_filters(&mut self, cx: &mut Context<Self>) -> Div {
@@ -435,7 +435,7 @@ impl Launcher {
         let f = self.mods.browse.filters.clone();
         let sorts = self.mods_sorts();
         let registry =
-            self.mods.source == SourceId::Horizon && self.mods.java_for(self.mods.kind).is_none();
+            self.mods.source == SourceId::Offrizon && self.mods.java_for(self.mods.kind).is_none();
         let sort = (!t.glass && !registry).then(|| self.mods_sort_dropdown(&sorts, f.sort, cx));
         let shown = self.mods.browse.show_filters;
         let active = f.categories.len()
@@ -694,7 +694,7 @@ impl Launcher {
                     "{count} stars on GitHub",
                     &[("count", &thousands(g.stars))],
                 )),
-                None if p.source != SourceId::Horizon => meta.push(trf(
+                None if p.source != SourceId::Offrizon => meta.push(trf(
                     "{count} followers",
                     &[("count", &thousands(d.followers))],
                 )),
@@ -802,7 +802,7 @@ impl Launcher {
             .child(head);
         // Registry projects are rated on the site, signed in with GitHub (one rating per account),
         // and starred on their source repository, which the player does there themselves.
-        if p.source == SourceId::Horizon {
+        if p.source == SourceId::Offrizon {
             let url = browser::horizon::rate_url(&p.id);
             let repo = match &details {
                 Some(Ok(d)) => d.github.as_ref().map(|g| g.url.clone()),

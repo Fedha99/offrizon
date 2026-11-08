@@ -694,7 +694,7 @@ fn any_owner_opens_the_gate_and_the_one_who_plays_brings_the_session() {
 fn offline_names_play_only_beside_an_owner() {
     let store = MemoryStore::default();
     let mut accounts = Accounts::default();
-    let refused = accounts.play_as(&store, Player::Offline("Builder_1".into()));
+    let refused = accounts.play_as_with(&store, Player::Offline("Builder_1".into()), false);
     assert_eq!(refused.unwrap_err(), OFFLINE_NEEDS_OWNER);
     assert!(accounts.offline.is_empty());
     let mut accounts = signed_in(&store, &secrets("mc-token", true));
@@ -709,7 +709,7 @@ fn offline_names_play_only_beside_an_owner() {
     let (_, ep) = mock(|_| {});
     assert!(launch(&ep, Some("test-client"), &store, &mut accounts).is_err());
     assert!(accounts
-        .play_as(&store, Player::Offline("Builder_2".into()))
+        .play_as_with(&store, Player::Offline("Builder_2".into()), false)
         .is_err());
 }
 
