@@ -1,0 +1,17 @@
+{
+  "name": "Offrizon build (fork)",
+  // Rust stable + tooling preinstalled; the post-create step adds the system libraries
+  // GPUI and the game link to — the same list fork-linux.yml installs on CI.
+  "image": "mcr.microsoft.com/devcontainers/rust:1",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends libxkbcommon-x11-dev libwayland-dev libx11-xcb-dev libfontconfig-dev libvulkan-dev libasound2-dev libudev-dev patchelf",
+  // Marked as this fork's build in every terminal: no self-update from upstream, telemetry off.
+  "remoteEnv": {
+    "HORIZON_FORK": "1",
+    "HORIZON_TELEMETRY_URL": "off"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["rust-lang.rust-analyzer"]
+    }
+  }
+}
