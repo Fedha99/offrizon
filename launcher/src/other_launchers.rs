@@ -447,6 +447,8 @@ pub fn in_folder(dir: &Path, launcher: Option<&'static str>) -> Vec<Found> {
     };
     let launcher = launcher.unwrap_or(if named(&["multimc", "MultiMC"]) {
         "MultiMC"
+    } else if named(&["ElyPrismLauncher"]) {
+        "Ely Prism Launcher"
     } else if named(&["PrismLauncher"]) {
         "Prism Launcher"
     } else {
@@ -469,7 +471,9 @@ pub fn scan(os: Os, folders: &Folders) -> Vec<Found> {
         seen.push(dir.clone());
         match launcher {
             OFFICIAL => found.extend(official_profiles(&dir)),
-            "Prism Launcher" | "MultiMC" => found.extend(prism_instances(&dir, launcher)),
+            "Prism Launcher" | "Ely Prism Launcher" | "MultiMC" => {
+                found.extend(prism_instances(&dir, launcher))
+            }
             "Modrinth App" => found.extend(modrinth_app_profiles(&dir)),
             ATLAUNCHER => found.extend(atlauncher_instances(&dir)),
             _ => {}

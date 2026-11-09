@@ -408,6 +408,16 @@ fn the_not_found_message_names_the_launcher_that_was_chosen() {
         "{error}"
     );
     assert!(!error.contains("or in Prism Launcher, MultiMC"), "{error}");
+    // The Ely.by fork's folder is named the same way, so its players get the launch-once advice.
+    let ely = s.0.join("ElyPrismLauncher");
+    let chosen = ely.join("instances/26.3/minecraft");
+    fs::create_dir_all(&chosen).unwrap();
+    let error =
+        resolve_with(&chosen, &[], &s.0.join("linked"), &Mojang::new(MANIFEST)).unwrap_err();
+    assert!(
+        error.contains("Launch the 26.3 instance once in Ely Prism Launcher"),
+        "{error}"
+    );
     // An unknown folder keeps the advice that names every launcher.
     let other = s.0.join("elsewhere");
     fs::create_dir_all(&other).unwrap();
@@ -450,6 +460,51 @@ fn the_known_folders_are_searched_after_the_chosen_one() {
         format!(
             "Using Minecraft 26.3 from Prism Launcher ({})",
             prism.display()
+        )
+    );
+}
+
+/// Ely.by's Prism Launcher fork keeps the same layout as Prism's in its own `ElyPrismLauncher`
+/// folder: the client jar under `libraries` and the version in `meta/net.minecraft`. It is one of
+/// the default folders, so a player who once launched the version there needs no Microsoft sign-in
+/// and no hand-picked folder.
+#[test]
+fn the_ely_prism_fork_is_found_with_the_other_default_folders() {
+    let s = Scratch::new("ely");
+    let jar = "libraries/com/mojang/minecraft/26.3/minecraft-26.3-client.jar";
+    let dir = s.launcher("ElyPrismLauncher", "", jar);
+    s.write(
+        "ElyPrismLauncher/meta/net.minecraft/26.3.json",
+        br#"{"mainJar": {"name": "com.mojang:minecraft:26.3:client"}}"#,
+    );
+    let chosen = s.0.join("chosen");
+    fs::create_dir_all(&chosen).unwrap();
+    let known = known_folders(
+        Os::Linux,
+        &Folders {
+            home: s.0.join("home"),
+            data: s.0.clone(),
+            config: s.0.join("config"),
+        },
+    );
+    let linked = s.0.join("linked");
+    let logged = RefCell::new(Vec::new());
+    let mojang = Mojang::new(MANIFEST);
+    let got = resolve(
+        &chosen,
+        &pins(),
+        &known,
+        &linked,
+        &|url| mojang.fetch(url),
+        &|line| logged.borrow_mut().push(line),
+    );
+    assert_eq!(got.unwrap(), Resolved::Folder(linked.clone()));
+    assert_linked(&linked, &dir, jar);
+    assert_eq!(
+        logged.borrow()[0],
+        format!(
+            "Using Minecraft 26.3 from Ely Prism Launcher ({})",
+            dir.display()
         )
     );
 }
@@ -543,6 +598,7 @@ fn each_system_has_its_launcher_folders() {
         "the official launcher: /home/r/.minecraft",
         "Prism Launcher: /home/r/.local/share/PrismLauncher",
         "Prism Launcher: /home/r/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher",
+        "Ely Prism Launcher: /home/r/.local/share/ElyPrismLauncher",
         "MultiMC: /home/r/.local/share/multimc",
         "Modrinth App: /home/r/.local/share/ModrinthApp",
         "Modrinth App: /home/r/.var/app/com.modrinth.ModrinthApp/data/ModrinthApp",
@@ -567,6 +623,9 @@ fn each_system_has_its_launcher_folders() {
     assert!(
         got.contains(&"Prism Launcher: /Users/r/Library/Application Support/PrismLauncher".into())
     );
+    assert!(got.contains(
+        &"Ely Prism Launcher: /Users/r/Library/Application Support/ElyPrismLauncher".into()
+    ));
     assert!(got.contains(&"Dawn Client: /Users/r/Library/Application Support/.dawn".into()));
     let windows = Folders {
         home: "C:/Users/r".into(),
@@ -579,5 +638,6 @@ fn each_system_has_its_launcher_folders() {
         "the official launcher: C:/Users/r/AppData/Roaming/.minecraft"
     );
     assert!(got.contains(&"ATLauncher: C:/Users/r/AppData/Roaming/ATLauncher".into()));
+    assert!(got.contains(&"Ely Prism Launcher: C:/Users/r/AppData/Roaming/ElyPrismLauncher".into()));
     assert!(got.contains(&"Dawn Client: C:/Users/r/AppData/Roaming/.dawn".into()));
 }

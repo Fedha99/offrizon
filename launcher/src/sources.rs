@@ -1,6 +1,6 @@
 //! Where the player's own Minecraft files are: the folder they chose, the official launcher's,
-//! or another launcher's (Prism Launcher, MultiMC, Modrinth App, ATLauncher, GDLauncher, Dawn
-//! Client), #434.
+//! or another launcher's (Prism Launcher and its Ely.by fork, MultiMC, Modrinth App, ATLauncher,
+//! GDLauncher, Dawn Client), #434.
 //! horizon-prepare reads the official launcher's layout and pins the version JSON's own sha1, so
 //! files found elsewhere are linked into that layout in the launcher's data folder, with the
 //! pinned version JSON from Mojang when the other launcher keeps its own rewrite of it.
@@ -122,6 +122,8 @@ pub fn known_folders(os: Os, f: &Folders) -> Vec<(&'static str, PathBuf)> {
                 "Prism Launcher",
                 flatpak("org.prismlauncher.PrismLauncher", "data/PrismLauncher"),
             ),
+            // Ely.by's Prism Launcher fork keeps its own data folder.
+            ("Ely Prism Launcher", f.data.join("ElyPrismLauncher")),
             ("MultiMC", f.data.join("multimc")),
             ("Modrinth App", f.data.join("ModrinthApp")),
             (
@@ -138,6 +140,7 @@ pub fn known_folders(os: Os, f: &Folders) -> Vec<(&'static str, PathBuf)> {
         Os::MacOs => vec![
             (OFFICIAL, f.data.join("minecraft")),
             ("Prism Launcher", f.data.join("PrismLauncher")),
+            ("Ely Prism Launcher", f.data.join("ElyPrismLauncher")),
             ("MultiMC", f.data.join("MultiMC")),
             ("Modrinth App", f.data.join("ModrinthApp")),
             ("ATLauncher", f.data.join("ATLauncher")),
@@ -146,6 +149,7 @@ pub fn known_folders(os: Os, f: &Folders) -> Vec<(&'static str, PathBuf)> {
         Os::Windows => vec![
             (OFFICIAL, f.data.join(".minecraft")),
             ("Prism Launcher", f.data.join("PrismLauncher")),
+            ("Ely Prism Launcher", f.data.join("ElyPrismLauncher")),
             ("Modrinth App", f.data.join("ModrinthApp")),
             ("ATLauncher", f.data.join("ATLauncher")),
             ("Dawn Client", f.data.join(".dawn")),
@@ -266,6 +270,7 @@ fn launcher_of(path: &Path) -> Option<&'static str> {
         .filter_map(|name| name.to_str())
         .find_map(|name| match name {
             "PrismLauncher" => Some("Prism Launcher"),
+            "ElyPrismLauncher" => Some("Ely Prism Launcher"),
             "multimc" | "MultiMC" => Some("MultiMC"),
             "ModrinthApp" | "com.modrinth.theseus" => Some("the Modrinth App"),
             "atlauncher" | "ATLauncher" => Some("ATLauncher"),
