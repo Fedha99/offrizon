@@ -1,0 +1,100 @@
+name: fork linux build
+# Offrizon's Linux x64 builds — the same two artifacts as fork-windows.yml, for Linux:
+#   - the offline launcher (owner gate relaxed, offline play on by default), and
+#   - the game client and its tools, to import with the launcher's "Import a game build…".
+# HORIZON_FORK=1 is built into the launcher: it never self-updates from horizon-rust/horizon's
+# releases, which would bring the owner gate back and undo the rebrand. The library lists are
+# launcher.yml's and game-build.yml's own Linux recipes. Run by hand (workflow_dispatch) or on
+# a push that touches the launcher or the game.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master, offrizon-rebrand]
+    paths:
+      - 'launcher/**'
+      - 'crates/**'
+      - '.github/workflows/fork-linux.yml'
+
+permissions:
+  contents: read
+
+env:
+  # Test and smoke runs never reach the telemetry server.
+  HORIZON_TELEMETRY_URL: "off"
+  # Marks the launcher as this fork's build (see backend::self_update_allowed).
+  HORIZON_FORK: "1"
+
+jobs:
+  launcher:
+    name: launcher linux x64
+    # 22.04 keeps glibc compatibility with older distros (upstream's launcher.yml builds here
+    # too); ubuntu-latest works as well if this image is unavailable on the fork.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: launcher
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Libraries GPUI links to
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-x11-dev libwayland-dev libx11-xcb-dev libfontconfig-dev libvulkan-dev libasound2-dev patchelf
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: launcher
+          shared-key: fork-launcher-linux
+      - run: cargo build --release --locked
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p out
+          short=${GITHUB_SHA::8}
+          cp target/release/horizon-launcher out/
+          (cd out && tar czf offrizon-launcher-$short-linux-x64.tar.gz horizon-launcher)
+          rm out/horizon-launcher
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offrizon-launcher-linux-x64
+          path: launcher/out/*
+          retention-days: 14
+
+  game:
+    name: game linux x64
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Libraries the client links to
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          shared-key: fork-game-linux
+      - run: cargo build --release --locked -p horizon-client -p horizon-client-lib --bin horizon-client --bin horizon-ctl -p horizon-prepare --bin horizon-prepare -p horizon-server --bin horizon-server
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p out/dist
+          short=${GITHUB_SHA::8}
+          for b in horizon-client horizon-ctl horizon-prepare horizon-server; do
+            test -f target/release/$b || { echo "::error::target/release/$b is missing"; exit 1; }
+            cp target/release/$b out/dist/
+          done
+          (cd out/dist && tar czf ../offrizon-client-$short-linux-x64.tar.gz \
+            horizon-client horizon-ctl horizon-prepare horizon-server)
+          rm -rf out/dist
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offrizon-client-linux-x64
+          path: out/*
+          retention-days: 14
