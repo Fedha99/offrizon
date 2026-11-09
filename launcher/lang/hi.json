@@ -1251,5 +1251,7 @@
   "Buy": "खरीदें",
   "Gift": "उपहार दें",
   "Found on this computer": "इस कंप्यूटर पर मिले",
-  "Looks": "लुक"
+  "Looks": "लुक",
+  "Play offline without an account": "बिना खाते ऑफ़लाइन खेलें",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "खेल सिर्फ़ खिलाड़ी के नाम से शुरू होता है, कोई Microsoft खाता नहीं, और बिना इंटरनेट के भी चलता रहता है. Minecraft की फ़ाइलें अब भी आपके अपने इंस्टॉलेशन से ही आती हैं."
 }

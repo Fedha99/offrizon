@@ -1251,5 +1251,7 @@
   "Buy": "Kaupa",
   "Gift": "Gefa",
   "Found on this computer": "Fundið á þessari tölvu",
-  "Looks": "Útlit"
+  "Looks": "Útlit",
+  "Play offline without an account": "Spila án nettengingar án aðgangs",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Leikurinn byrjar með bara leikmannsnafn, engan Microsoft-aðgang, og heldur áfram að virka án internets. Skrár Minecraft koma enn úr eigin uppsetningu þinni."
 }

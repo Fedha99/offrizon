@@ -1251,5 +1251,7 @@
   "Buy": "ყიდვა",
   "Gift": "ჩუქება",
   "Found on this computer": "ნაპოვნია ამ კომპიუტერზე",
-  "Looks": "იერსახეები"
+  "Looks": "იერსახეები",
+  "Play offline without an account": "ითამაშე ოფლაინ ანგარიშის გარეშე",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "თამაში იწყება მხოლოდ მოთამაშის სახელით, Microsoft-ის ანგარიშის გარეშე, და ინტერნეტის გარეშეც აგრძელებს მუშაობას. Minecraft-ის ფაილები კვლავ შენს საკუთარ ინსტალაციიდან მოდის."
 }

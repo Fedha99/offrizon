@@ -1251,5 +1251,7 @@
   "Buy": "Bilhin",
   "Gift": "Iregalo",
   "Found on this computer": "Nakita sa computer na ito",
-  "Looks": "Mga look"
+  "Looks": "Mga look",
+  "Play offline without an account": "Maglaro nang offline nang walang account",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Nagsisimula ang laro sa pangalan ng manlalaro lang, walang Microsoft account, at patuloy na gumagana nang walang internet. Ang mga file ng Minecraft ay mula pa rin sa sarili mong pagkaka-install."
 }

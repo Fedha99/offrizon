@@ -1251,5 +1251,7 @@
   "Buy": "Compra",
   "Gift": "Regala",
   "Found on this computer": "Trobats en aquest ordinador",
-  "Looks": "Estils"
+  "Looks": "Estils",
+  "Play offline without an account": "Juga fora de línia sense compte",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "El joc comença només amb un nom de jugador, sense compte de Microsoft, i continua funcionant sense internet. Els fitxers de Minecraft encara venen de la vostra pròpia instal·lació."
 }

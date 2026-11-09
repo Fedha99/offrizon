@@ -1251,5 +1251,7 @@
   "Buy": "Сатып алу",
   "Gift": "Сыйлау",
   "Found on this computer": "Осы компьютерден табылды",
-  "Looks": "Бейнелер"
+  "Looks": "Бейнелер",
+  "Play offline without an account": "Аккаунтсыз офлайн ойнау",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Ойын тек ойыншы атымен басталады, Microsoft аккаунты қажет емес және интернетсіз жұмыс істеуін жалғастырады. Minecraft файлдары әлі де өз орнатуыңыздан келеді."
 }

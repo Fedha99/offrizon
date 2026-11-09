@@ -1251,5 +1251,7 @@
   "Buy": "Αγορά",
   "Gift": "Δώρο",
   "Found on this computer": "Βρέθηκαν σε αυτόν τον υπολογιστή",
-  "Looks": "Εμφανίσεις"
+  "Looks": "Εμφανίσεις",
+  "Play offline without an account": "Παίξτε εκτός σύνδεσης χωρίς λογαριασμό",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Το παιχνίδι ξεκινά μόνο με όνομα παίκτη, χωρίς λογαριασμό Microsoft, και συνεχίζει να λειτουργεί χωρίς ίντερνετ. Τα αρχεία του Minecraft εξακολουθούν να προέρχονται από τη δική σας εγκατάσταση."
 }

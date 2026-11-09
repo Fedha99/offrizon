@@ -1251,5 +1251,7 @@
   "Buy": "شراء",
   "Gift": "إهداء",
   "Found on this computer": "موجود على هذا الحاسوب",
-  "Looks": "إطلالات"
+  "Looks": "إطلالات",
+  "Play offline without an account": "العب دون اتصال بدون حساب",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "تبدأ اللعبة باسم لاعب فقط، دون حساب Microsoft، وتواصل العمل بلا إنترنت. ملفات Minecraft ما زالت تأتي من تثبيتك الخاص."
 }

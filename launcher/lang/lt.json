@@ -1251,5 +1251,7 @@
   "Buy": "Pirkti",
   "Gift": "Dovanoti",
   "Found on this computer": "Rasta šiame kompiuteryje",
-  "Looks": "Įvaizdžiai"
+  "Looks": "Įvaizdžiai",
+  "Play offline without an account": "Žaisti be interneto be paskyros",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Žaidimas prasideda vien žaidėjo vardu, be „Microsoft“ paskyros, ir veikia toliau be interneto. Minecraft failai vis tiek imami iš jūsų pačio įdiegimo."
 }

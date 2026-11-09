@@ -1251,5 +1251,7 @@
   "Buy": "Satın al",
   "Gift": "Hediye et",
   "Found on this computer": "Bu bilgisayarda bulunanlar",
-  "Looks": "Görünümler"
+  "Looks": "Görünümler",
+  "Play offline without an account": "Hesapsız çevrimdışı oyna",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Oyun yalnızca bir oyuncu adıyla başlar, Microsoft hesabı gerekmez ve internet olmadan çalışmaya devam eder. Minecraft dosyaları yine de kendi kurulumunuzdan gelir."
 }

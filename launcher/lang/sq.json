@@ -1251,5 +1251,7 @@
   "Buy": "Bli",
   "Gift": "Dhuro",
   "Found on this computer": "Gjetur në këtë kompjuter",
-  "Looks": "Pamje"
+  "Looks": "Pamje",
+  "Play offline without an account": "Luaj offline pa llogari",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Loja nis vetëm me emrin e lojtarit, pa llogari Microsoft, dhe vazhdon të punojë pa internet. Skedarët e Minecraft vijnë ende nga instalimi juaj."
 }

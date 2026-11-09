@@ -1251,5 +1251,7 @@
   "Buy": "Худалдаж авах",
   "Gift": "Бэлэглэх",
   "Found on this computer": "Энэ компьютерээс олдсон",
-  "Looks": "Төрхүүд"
+  "Looks": "Төрхүүд",
+  "Play offline without an account": "Дансгүй офлайн тоглох",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Тоглоом зөвхөн тоглогчийн нэрээр эхэлдэг, Microsoft данс шаардлагагүй, интернэтгүй ч ажиллахдаа хэвээр байна. Minecraft файлууд одоо ч өөрийн суулгаснаас ирдэг."
 }

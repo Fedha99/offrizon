@@ -1251,5 +1251,7 @@
   "Buy": "购买",
   "Gift": "赠送",
   "Found on this computer": "在这台电脑上找到",
-  "Looks": "造型"
+  "Looks": "造型",
+  "Play offline without an account": "无需账号离线游玩",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "游戏只需一个玩家名字即可开始，不需要 Microsoft 账号，没有网络也能继续玩。Minecraft 的文件仍然来自你自己的安装。"
 }

@@ -1251,5 +1251,7 @@
   "Buy": "Vásárlás",
   "Gift": "Ajándékozás",
   "Found on this computer": "Ezen a számítógépen található",
-  "Looks": "Szettek"
+  "Looks": "Szettek",
+  "Play offline without an account": "Játék offline, fiók nélkül",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "A játék csak egy játékosnévvel indul, Microsoft-fiók nélkül, és internet nélkül is tovább működik. A Minecraft fájljai továbbra is a saját telepítésedből jönnek."
 }

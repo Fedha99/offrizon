@@ -1251,5 +1251,7 @@
   "Buy": "Sotib olish",
   "Gift": "Sovgʻa qilish",
   "Found on this computer": "Shu kompyuterda topildi",
-  "Looks": "Obrazlar"
+  "Looks": "Obrazlar",
+  "Play offline without an account": "Hisobsiz oflayn o'ynang",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "O'yin faqat o'yinchi nomi bilan boshlanadi, Microsoft hisobi kerak emas va internetsiz ham ishlashda davom etadi. Minecraft fayllari hali ham o'z o'rnatuvingizdan keladi."
 }

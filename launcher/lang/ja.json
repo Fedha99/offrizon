@@ -1251,5 +1251,7 @@
   "Buy": "購入",
   "Gift": "ギフト",
   "Found on this computer": "このコンピューターで見つかったもの",
-  "Looks": "コーデ"
+  "Looks": "コーデ",
+  "Play offline without an account": "アカウントなしでオフラインで遊ぶ",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "ゲームはプレイヤー名だけで始まり、Microsoft アカウントは不要で、インターネットがなくても動き続けます。Minecraft のファイルは引き続きあなた自身のインストールから読み込まれます。"
 }

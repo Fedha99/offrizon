@@ -1251,5 +1251,7 @@
   "Buy": "Գնել",
   "Gift": "Նվիրել",
   "Found on this computer": "Գտնվել են այս համակարգչում",
-  "Looks": "Կերպարներ"
+  "Looks": "Կերպարներ",
+  "Play offline without an account": "Խաղալ օֆլայն՝ առանց հաշվի",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Խաղը սկսվում է միայն խաղացողի անունով, առանց Microsoft հաշվի, և շարունակում է աշխատել առանց ինտերնետի. Minecraft-ի ֆայլերը դեռ գալիս են ձեր սեփական տեղադրումից."
 }

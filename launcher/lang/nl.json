@@ -1251,5 +1251,7 @@
   "Buy": "Kopen",
   "Gift": "Cadeau geven",
   "Found on this computer": "Gevonden op deze computer",
-  "Looks": "Looks"
+  "Looks": "Looks",
+  "Play offline without an account": "Offline spelen zonder account",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Het spel start met alleen een spelersnaam, zonder Microsoft-account, en blijft gewoon werken zonder internet. De Minecraft-bestanden komen nog steeds uit je eigen installatie."
 }

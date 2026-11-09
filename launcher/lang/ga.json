@@ -1251,5 +1251,7 @@
   "Buy": "Ceannaigh",
   "Gift": "Tabhair mar bhronntanas",
   "Found on this computer": "Aimsithe ar an ríomhaire seo",
-  "Looks": "Stíleanna"
+  "Looks": "Stíleanna",
+  "Play offline without an account": "Seinn as líne gan cuntas",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Tosaíonn an cluiche le hainm imreora amháin, gan cuntas Microsoft, agus leanann sé ar aghaidh ag obair gan idirlíon. Tagann comhaid Minecraft fós ó do shuiteáil féin."
 }

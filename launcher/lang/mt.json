@@ -1251,5 +1251,7 @@
   "Buy": "Ixtri",
   "Gift": "Agħti rigal",
   "Found on this computer": "Misjuba fuq dan il-kompjuter",
-  "Looks": "Dehriet"
+  "Looks": "Dehriet",
+  "Play offline without an account": "Ilgħab offline bla kont",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Il-logħba tibda b'isem plejer biss, bla kont ta' Microsoft, u tkompli taħdem bla internet. Il-fajls ta' Minecraft għadhom jiġu mill-istallazzjoni tiegħek stess."
 }

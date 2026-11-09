@@ -1251,5 +1251,7 @@
   "Buy": "Eme",
   "Gift": "Dona",
   "Found on this computer": "In hoc computatro inventa",
-  "Looks": "Habitus"
+  "Looks": "Habitus",
+  "Play offline without an account": "Lude sine connexione sine ratione",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Ludus solo nomine lusoris incipit, ratione Microsoft nulla, et sine interrete operari pergit. Documenta Minecraft ex institutione tua ipsa adhuc veniunt."
 }

@@ -1251,5 +1251,7 @@
   "Buy": "Pirkt",
   "Gift": "Dāvināt",
   "Found on this computer": "Atrasts šajā datorā",
-  "Looks": "Tēli"
+  "Looks": "Tēli",
+  "Play offline without an account": "Spēlēt bez tiešsaistes bez konta",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Spēle sākas tikai ar spēlētāja vārdu, bez Microsoft konta, un turpina darboties bez interneta. Minecraft faili joprojām nāk no jūsu paša instalācijas."
 }

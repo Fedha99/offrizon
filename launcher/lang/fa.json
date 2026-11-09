@@ -1251,5 +1251,7 @@
   "Buy": "خرید",
   "Gift": "هدیه دادن",
   "Found on this computer": "پیدا‌شده روی این رایانه",
-  "Looks": "ظاهرها"
+  "Looks": "ظاهرها",
+  "Play offline without an account": "بازی آفلاین بدون حساب",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "بازی فقط با نام بازیکن شروع می‌شود، بدون حساب Microsoft، و بدون اینترنت به کار ادامه می‌دهد. فایل‌های Minecraft همچنان از نصب خودتان می‌آیند."
 }

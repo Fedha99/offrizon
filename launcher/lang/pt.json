@@ -1251,5 +1251,7 @@
   "Buy": "Comprar",
   "Gift": "Oferecer",
   "Found on this computer": "Encontrados neste computador",
-  "Looks": "Visuais"
+  "Looks": "Visuais",
+  "Play offline without an account": "Jogar offline sem conta",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "O jogo começa apenas com um nome de jogador, sem conta Microsoft, e continua a funcionar sem internet. Os ficheiros do Minecraft continuam a vir da sua própria instalação."
 }

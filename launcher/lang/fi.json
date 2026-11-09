@@ -1251,5 +1251,7 @@
   "Buy": "Osta",
   "Gift": "Lahjoita",
   "Found on this computer": "Löytyi tältä tietokoneelta",
-  "Looks": "Asut"
+  "Looks": "Asut",
+  "Play offline without an account": "Pelaa ilman verkkoa ilman tiliä",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Peli käynnistyy vain pelaajanimellä, ilman Microsoft-tiliä, ja jatkaa toimimista ilman internetiä. Minecraftin tiedostot tulevat yhä omasta asennuksestasi."
 }

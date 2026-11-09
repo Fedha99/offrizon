@@ -1251,5 +1251,7 @@
   "Buy": "Erosi",
   "Gift": "Oparitu",
   "Found on this computer": "Ordenagailu honetan aurkituak",
-  "Looks": "Itxurak"
+  "Looks": "Itxurak",
+  "Play offline without an account": "Jolastu lineaz kanpo konturik gabe",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Jokoa jokalari-izen batekin hasten da soilik, Microsoft konturik gabe, eta internet gabe funtzionatzen jarraitzen du. Minecraft fitxategiak zure instalaziotik datoz oraindik."
 }

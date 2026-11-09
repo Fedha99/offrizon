@@ -1251,5 +1251,7 @@
   "Buy": "Osta",
   "Gift": "Kingi",
   "Found on this computer": "Leitud sellest arvutist",
-  "Looks": "Välimused"
+  "Looks": "Välimused",
+  "Play offline without an account": "Mängi võrguühenduseta ilma kontota",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Mäng käivitub ainult mängijanimega, ilma Microsofti kontota, ja töötab edasi ka ilma internetita. Minecrafti failid tulevad ikka sinu enda paigaldusest."
 }

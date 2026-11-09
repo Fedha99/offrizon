@@ -1251,5 +1251,7 @@
   "Buy": "Купити",
   "Gift": "Подарувати",
   "Found on this computer": "Знайдено на цьому комп'ютері",
-  "Looks": "Образи"
+  "Looks": "Образи",
+  "Play offline without an account": "Грати офлайн без облікового запису",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Гра запускається лише з іменем гравця, без облікового запису Microsoft, і продовжує працювати без інтернету. Файли Minecraft надалі беруться з вашої власної установки."
 }

@@ -1251,5 +1251,7 @@
   "Buy": "קנייה",
   "Gift": "מתנה",
   "Found on this computer": "נמצאו במחשב הזה",
-  "Looks": "מראות"
+  "Looks": "מראות",
+  "Play offline without an account": "שחקו לא מקוון בלי חשבון",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "המשחק מתחיל רק עם שם שחקן, בלי חשבון Microsoft, וממשיך לעבוד בלי אינטרנט. קובצי ה-Minecraft עדיין מגיעים מההתקנה שלכם."
 }

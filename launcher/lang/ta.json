@@ -1251,5 +1251,7 @@
   "Buy": "வாங்கு",
   "Gift": "பரிசளி",
   "Found on this computer": "இந்தக் கணினியில் கண்டறியப்பட்டவை",
-  "Looks": "தோற்றங்கள்"
+  "Looks": "தோற்றங்கள்",
+  "Play offline without an account": "கணக்கு இல்லாமல் ஆஃப்லைனில் விளையாடுங்கள்",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "விளையாட்டு வெறும் வீரர் பெயருடன் தொடங்குகிறது, Microsoft கணக்கு தேவையில்லை, இணையம் இல்லாமலும் தொடர்ந்து வேலை செய்கிறது. Minecraft கோப்புகள் இன்னும் உங்கள் சொந்த நிறுவலிலிருந்தே வருகின்றன."
 }

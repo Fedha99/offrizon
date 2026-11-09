@@ -1251,5 +1251,7 @@
   "Buy": "Kúpiť",
   "Gift": "Darovať",
   "Found on this computer": "Nájdené v tomto počítači",
-  "Looks": "Vzhľady"
+  "Looks": "Vzhľady",
+  "Play offline without an account": "Hrať offline bez účtu",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Hra sa spustí len s menom hráča, bez účtu Microsoft, a funguje ďalej aj bez internetu. Súbory Minecraftu stále pochádzajú z vašej vlastnej inštalácie."
 }

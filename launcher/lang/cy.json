@@ -1251,5 +1251,7 @@
   "Buy": "Prynu",
   "Gift": "Rhoi fel anrheg",
   "Found on this computer": "Wedi'u canfod ar y cyfrifiadur hwn",
-  "Looks": "Gwisgoedd"
+  "Looks": "Gwisgoedd",
+  "Play offline without an account": "Chwarae all-lein heb gyfrif",
+  "The game starts with just a player name, no Microsoft account, and keeps working with no internet. Minecraft's files still come from your own install.": "Mae'r gêm yn dechrau gyda dim ond enw chwaraewr, dim cyfrif Microsoft, ac mae'n parhau i weithio heb rhyngrwyd. Mae ffeiliau Minecraft yn dal i ddod o'ch gosodiad eich hun."
 }
