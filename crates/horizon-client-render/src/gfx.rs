@@ -2266,6 +2266,18 @@ async fn open_with_retry(
                             info.name
                         ));
                     }
+                    if is_broken_ivb_vulkan(&info) {
+                        log::warn!(
+                            "Horizon renderer: skipping {} on Vulkan because Mesa hasvk is \
+                             non-conformant and slow on Ivy Bridge; falling back to the next backend",
+                            info.name
+                        );
+                        return Err(format!(
+                            "Mesa hasvk on Ivy Bridge ({}) is non-conformant and slow under Vulkan; \
+                             falling back",
+                            info.name
+                        ));
+                    }
                     log::warn!(
                         "Horizon renderer: using {} although its driver reports no Vulkan \
                          conformance version",
@@ -2285,7 +2297,8 @@ async fn open_with_retry(
 }
 /// Intel Haswell (Gen 7.5) Mesa Vulkan driver (`hasvk`) reports 0.0.0.0 and suffers
 /// from severe vertex buffer corruption and polygon tearing (#9912), but its OpenGL driver
-/// (`crocus`) is fully conformant and stable. Ivy Bridge (`IVB`) keeps Vulkan (#4059).
+/// (`crocus`) is fully conformant and stable. Upstream keeps Ivy Bridge on Vulkan (#4059);
+/// this fork sends Gen 7 to OpenGL too — see `is_broken_ivb_vulkan`.
 pub(crate) fn is_broken_haswell_vulkan(info: &wgpu::AdapterInfo) -> bool {
     info.backend == wgpu::Backend::Vulkan
         && info.vendor == 0x8086
@@ -2295,6 +2308,21 @@ pub(crate) fn is_broken_haswell_vulkan(info: &wgpu::AdapterInfo) -> bool {
                 | 0x0a00..=0x0a2f // Haswell ULT (Ultrabook)
                 | 0x0d00..=0x0d2f // Haswell CRW (Crystal Well)
         ) || ["HSW", "Haswell"].iter().any(|tag| info.name.contains(tag)))
+}
+/// Intel Ivy Bridge and Bay Trail (Gen 7) — the fork's answer to the same Mesa
+/// `hasvk` trouble Haswell has above: hasvk on Gen 7 is non-conformant (it reports
+/// 0.0.0.0) and its Vulkan path crawls on the tiny Gen 7 iGPUs, which showed up as
+/// constant stutter and a twice-rebuilt renderer on an HD Graphics 4000 laptop.
+/// `crocus`, the OpenGL driver for the same hardware, is conformant and stable,
+/// so the renderer falls back to OpenGL instead of staying on Vulkan.
+pub(crate) fn is_broken_ivb_vulkan(info: &wgpu::AdapterInfo) -> bool {
+    info.backend == wgpu::Backend::Vulkan
+        && info.vendor == 0x8086
+        && (matches!(
+            info.device,
+            0x0152 | 0x0156 | 0x015A | 0x015E | 0x0162 | 0x0166 | 0x016A // Ivy Bridge
+                | 0x0155 | 0x0157 | 0x0F31..=0x0F36 // Bay Trail (Valleyview)
+        ) || ["IVB", "BYT"].iter().any(|tag| info.name.contains(tag)))
 }
 /// Opens a device on `backends` alone: its surface, adapter and device, or what
 /// stopped it. `allow_nonconformant` is `open_with_retry`'s second try; a
@@ -14448,6 +14476,52 @@ mod sprite_upload_tests {
         info.device = 0x0a16;
         info.backend = wgpu::Backend::Gl;
         assert!(!is_broken_haswell_vulkan(&info));
+    }
+
+    #[test]
+    fn broken_ivb_vulkan_detects_gen7_and_leaves_everyone_else() {
+        let mut info = wgpu::AdapterInfo {
+            name: "Intel(R) HD Graphics 4000 (IVB GT2)".into(),
+            vendor: 0x8086,
+            device: 0x0166,
+            device_type: wgpu::DeviceType::IntegratedGpu,
+            device_pci_bus_id: String::new(),
+            driver: "Mesa 26.2.1".into(),
+            driver_info: "Mesa 26.2.1".into(),
+            backend: wgpu::Backend::Vulkan,
+            subgroup_min_size: 0,
+            subgroup_max_size: 0,
+            transient_saves_memory: None,
+            limit_bucket: None,
+        };
+        // the stuttering HD 4000 laptop: hasvk, non-conformant
+        assert!(is_broken_ivb_vulkan(&info));
+
+        // the same call by device id alone, and Bay Trail (Gen 7 SoC) along with it
+        info.name = "Intel(R) HD Graphics".into();
+        info.device = 0x0166;
+        assert!(is_broken_ivb_vulkan(&info));
+        info.name = "Intel(R) HD Graphics (BYT GT1)".into();
+        info.device = 0x0F31;
+        assert!(is_broken_ivb_vulkan(&info));
+
+        // Skylake (Gen 9) stays on Vulkan: conformant there
+        info.name = "Intel(R) HD Graphics 520 (SKL GT2)".into();
+        info.device = 0x1916;
+        assert!(!is_broken_ivb_vulkan(&info));
+
+        // crocus (OpenGL) on the same Gen 7 hardware is fine
+        info.name = "Intel(R) HD Graphics 4000 (IVB GT2)".into();
+        info.device = 0x0166;
+        info.backend = wgpu::Backend::Gl;
+        assert!(!is_broken_ivb_vulkan(&info));
+
+        // and other vendors are untouched
+        info.name = "NVIDIA GeForce RTX 3080".into();
+        info.vendor = 0x10de;
+        info.device = 0x2206;
+        info.backend = wgpu::Backend::Vulkan;
+        assert!(!is_broken_ivb_vulkan(&info));
     }
 
     #[test]
