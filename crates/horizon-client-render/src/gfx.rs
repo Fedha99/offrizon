@@ -89,10 +89,18 @@ pub fn outline_vertices(edges: &[[f64; 6]], camera: glam::DVec3) -> Vec<[f32; 6]
 /// Whether the renderer should initialize its occlusion culling pass (`cull`).
 ///
 /// Software adapters spend more time running the culling pass than drawing
-/// the sections it removes. Keep the pass available for explicit A/B checks,
-/// while leaving hardware adapters on the existing default.
-fn occlusion_culling_requested(info: &wgpu::AdapterInfo, env: Option<&str>) -> bool {
-    env != Some("0") && (env.is_some() || info.device_type != wgpu::DeviceType::Cpu)
+/// the sections it removes, and so do the drivers wgpu hides as
+/// non-conformant: Mesa's Vulkan drivers for Ivy Bridge and Haswell drive
+/// integrated GPUs whose compute is slow and whose memory the CPU shares.
+/// Keep the pass available for explicit A/B checks, while leaving the rest
+/// on the existing default. `modest_driver` is `graphics::modest_driver()`.
+fn occlusion_culling_requested(
+    info: &wgpu::AdapterInfo,
+    env: Option<&str>,
+    modest_driver: bool,
+) -> bool {
+    env != Some("0")
+        && (env.is_some() || (info.device_type != wgpu::DeviceType::Cpu && !modest_driver))
 }
 
 /// `DrawableGizmoPrimitives.getGroup`: a line whose ARGB alpha is 255 joins the
@@ -2263,6 +2271,9 @@ async fn open_with_retry(
                          conformance version",
                         info.name
                     );
+                    // Horizon's own extra passes assume a conformant driver's compute and
+                    // bandwidth; noted, so they leave themselves off (`modest_driver`).
+                    crate::graphics::note_modest_driver(true);
                     Ok(opened)
                 }
                 Err(NoDevice::NoAdapter(e)) | Err(NoDevice::Failed(e)) => Err(e),
@@ -4764,8 +4775,11 @@ impl Renderer {
         // the shader as on Metal (A/B checks).
         let cull_env = std::env::var("HORIZON_GPU_CULL");
         let adapter_info = adapter.get_info();
+        let modest_driver = crate::graphics::modest_driver();
         let cull = cull::Cull::supported(&adapter, &device)
-            .filter(|_| occlusion_culling_requested(&adapter_info, cull_env.as_deref().ok()))
+            .filter(|_| {
+                occlusion_culling_requested(&adapter_info, cull_env.as_deref().ok(), modest_driver)
+            })
             .map(|depth_test| match cull_env.as_deref() {
                 Ok("shader") => cull::DepthTest::InShader,
                 _ => depth_test,
@@ -4778,6 +4792,20 @@ impl Renderer {
                 }
                 cull
             });
+        // Told once per start, not again on a resource-pack reload: where the
+        // pass went, and where the player gets the frames back.
+        if previous.is_none()
+            && cull.is_none()
+            && cull_env.is_err()
+            && modest_driver
+            && adapter_info.device_type != wgpu::DeviceType::Cpu
+        {
+            log::info!(
+                "Horizon renderer: no occlusion-culling pass on this driver: it costs more than \
+                 it draws here (HORIZON_GPU_CULL=1 forces it on). If the game still stutters, \
+                 Graphics' Battery Mode and Reduced far detail give frames back"
+            );
+        }
         let depth = Self::depth(&device, &config);
         let world_post = world_post::Post::new(&device, frame_format);
         let uploads = upload::Uploads::new(&device);
@@ -12795,10 +12823,24 @@ mod tests {
     fn software_occlusion_culling_is_opt_in() {
         let cpu = adapter(wgpu::DeviceType::Cpu);
         let discrete = adapter(wgpu::DeviceType::DiscreteGpu);
-        assert!(!super::occlusion_culling_requested(&cpu, None));
-        assert!(super::occlusion_culling_requested(&discrete, None));
-        assert!(super::occlusion_culling_requested(&cpu, Some("all")));
-        assert!(!super::occlusion_culling_requested(&discrete, Some("0")));
+        assert!(!super::occlusion_culling_requested(&cpu, None, false));
+        assert!(super::occlusion_culling_requested(&discrete, None, false));
+        assert!(super::occlusion_culling_requested(&cpu, Some("all"), false));
+        assert!(!super::occlusion_culling_requested(
+            &discrete,
+            Some("0"),
+            false
+        ));
+        // The drivers wgpu hides as non-conformant (Mesa's Vulkan for Ivy
+        // Bridge and Haswell) leave the pass off too, until the variable
+        // forces it back on for an A/B check.
+        let integrated = adapter(wgpu::DeviceType::IntegratedGpu);
+        assert!(!super::occlusion_culling_requested(&integrated, None, true));
+        assert!(super::occlusion_culling_requested(
+            &integrated,
+            Some("1"),
+            true
+        ));
     }
 
     /// Translucent Batching is offered with indirect multi-draws that aren't OpenGL's, flat

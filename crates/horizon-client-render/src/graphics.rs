@@ -494,6 +494,21 @@ pub fn reduced_far_detail_suggested() -> bool {
     REDUCED_SUGGESTED.load(std::sync::atomic::Ordering::Relaxed)
 }
 
+static MODEST_DRIVER: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+/// Notes the device in use as a driver wgpu hides as non-conformant: Mesa's
+/// Vulkan drivers for Ivy Bridge and Haswell report no conformance version,
+/// and the integrated GPUs they drive share the CPU's memory. Horizon's own
+/// extra passes cost more there than they draw, so the renderer leaves its
+/// occlusion-culling pass off (`gfx::occlusion_culling_requested`) and the
+/// settings point the player at the rest of the frames.
+pub fn note_modest_driver(on: bool) {
+    MODEST_DRIVER.store(on, std::sync::atomic::Ordering::Relaxed);
+}
+/// Whether the device in use runs such a driver (`note_modest_driver`).
+pub fn modest_driver() -> bool {
+    MODEST_DRIVER.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 /// The name the options screen waits on to bind `Graphics::hdr_key`.
 pub const HDR_KEY: &str = "horizon.hdrSettings";
 /// The Screenshot Quality choices, times the game's resolution.
@@ -1344,6 +1359,14 @@ mod tests {
                 assert_eq!(Graphics::parse(&s.horizon.serialize()), s.horizon);
             }
         }
+    }
+
+    #[test]
+    fn a_modest_driver_is_noted_until_told_otherwise() {
+        note_modest_driver(true);
+        assert!(modest_driver());
+        note_modest_driver(false);
+        assert!(!modest_driver());
     }
 
     #[test]
